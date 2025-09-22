@@ -3,7 +3,7 @@
   "compilerOptions": {
     "incremental": true,
     "tsBuildInfoFile": "./node_modules/typescript/tsbuildinfo",
-    "noEmit": false,
+    "noEmit": true,
     "allowImportingTsExtensions": true,
     "module": "ESNext",
     "isolatedModules": true,
