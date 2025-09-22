@@ -7,7 +7,7 @@
     "allowImportingTsExtensions": true,
     "module": "ESNext",
     "isolatedModules": true,
-    "strict": false
+    "strict": false,
     "lib": ["esnext", "dom", "dom.iterable"],
     "jsx": "preserve",
     "esModuleInterop": true,
