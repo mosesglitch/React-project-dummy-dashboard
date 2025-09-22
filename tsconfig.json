@@ -3,7 +3,7 @@
   "compilerOptions": {
     "incremental": true,
     "tsBuildInfoFile": "./node_modules/typescript/tsbuildinfo",
-    "noEmit": true,
+    "noEmit": false,
     "allowImportingTsExtensions": true,
     "module": "ESNext",
     "isolatedModules": true,
@@ -12,9 +12,10 @@
     "jsx": "preserve",
     "esModuleInterop": true,
     "skipLibCheck": true,
+    "noImplicitAny": false,
     "moduleResolution": "Bundler",
     "baseUrl": ".",
-    "types": ["node", "vite/client"],
+    "types": ["node"],
     "paths": {
       "@/*": ["./src/*"],
       "@shared/*": ["./shared/*"]
