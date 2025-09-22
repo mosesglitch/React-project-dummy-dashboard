@@ -1,5 +1,5 @@
 {
-  "include": ["src/**/*", "**/*.test.ts"]
+  "include": ["src/**/*", "**/*.test.ts"],
   "compilerOptions": {
     "incremental": true,
     "tsBuildInfoFile": "./node_modules/typescript/tsbuildinfo",
