@@ -1,24 +1,18 @@
 {
   "include": ["src/**/*", "**/*.test.ts"],
   "compilerOptions": {
-    "incremental": true,
-    "tsBuildInfoFile": "./node_modules/typescript/tsbuildinfo",
-    "noEmit": true,
-    "allowImportingTsExtensions": true,
-    "module": "ESNext",
-    "isolatedModules": true,
-    "strict": false,
-    "lib": ["esnext", "dom", "dom.iterable"],
-    "jsx": "preserve",
-    "esModuleInterop": true,
+    "target": "ES2018",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
     "skipLibCheck": true,
-    "noImplicitAny": false,
-    "moduleResolution": "Bundler",
-    "baseUrl": ".",
-    "types": ["node"],
-    "paths": {
-      "@/*": ["./src/*"],
-      "@shared/*": ["./shared/*"]
-    }
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true,
   }
 }
