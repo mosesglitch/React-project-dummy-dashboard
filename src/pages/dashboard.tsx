@@ -182,6 +182,7 @@ export default function Dashboard() {
     }
     return <Badge variant="outline">{status}</Badge>;
   };
+console.log(selectedProjectId,"selectedProjectId");
 
   const { theme, setTheme } = useTheme();
   if (

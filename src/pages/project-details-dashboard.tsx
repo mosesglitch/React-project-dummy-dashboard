@@ -1,6 +1,6 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { useParams, Link } from "wouter";
-import React, { act, useState,useMemo } from "react";
+import React, { act, useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -118,7 +118,7 @@ const formatDate = (excelDate: number | string | null | undefined): string => {
 
 interface Risk {
   _id?: string;
-  projectCode: string;
+  projectCode?: string;
   title: string;
   description: string;
   status: "active" | "resolved" | "mitigated";
@@ -190,7 +190,7 @@ const getProgressColor = (percentageComplete: number | string) => {
   return "bg-blue-500";
 };
 
-export default function ProjectDetailsDashboard({id,setSelectedProjectId}: {id: string | number,setSelectedProjectId: (id: string) => void}) {
+export default function ProjectDetailsDashboard({ id, setSelectedProjectId }: { id: string | number, setSelectedProjectId: (id: string) => void }) {
   const [startDateForUpcoming, setStartDateForUpcoming] = useState<string>("");
   const [isAddingRisk, setIsAddingRisk] = useState(false);
   const [editingRisk, setEditingRisk] = useState<Risk | null>(null);
@@ -201,36 +201,13 @@ export default function ProjectDetailsDashboard({id,setSelectedProjectId}: {id: 
     priority: "medium" as Risk["priority"],
     owner: "Project Manager" as Risk["owner"],
   });
-console.log(id, "id");
-  const queryClient = useQueryClient();
-const projectLoading = false;
-  // const { id } = useParams();
-  // Fetch project data
-  const project = useMemo(() => {
-      return id ? dataService.getProjectById(id) : undefined;
-    }, [id]);
-console.log(project, "proj");
-  // Fetch activities data
-   // Get activities data from local service
-  const milestones = useMemo(() => {
-    return project?.projectCode ? dataService.getMilestonesByProjectCode(project.projectCode.toString()) : [];
-  }, [project?.projectCode]);
-
-
-  // Fetch risks
-  
-    // const risks = useMemo(() => {
-    //   return project?.projectCode ? dataService.getRisksByProjectCode(project.projectCode.toString()) : [];
-    // }, [project?.projectCode]);
-
-  const risks=[
-  {
+  const [risks, setRisks] = useState<Risk[]>([{
     "_id": "651a23b0d1e5f4c6a2e9b1d2",
     "title": "Supply Chain Delays",
     "description": "Risk of critical components arriving late, impacting the project timeline.",
     "priority": "high",
     "status": "active",
-    "owner": "John Doe"
+    "owner": "Procurement Manager"
   },
   {
     "_id": "651a23b0d1e5f4c6a2e9b1d3",
@@ -238,7 +215,7 @@ console.log(project, "proj");
     "description": "Potential for project costs to exceed the allocated budget due to unforeseen expenses.",
     "priority": "medium",
     "status": "mitigated",
-    "owner": "Jane Doe"
+    "owner": "Finance Controller"
   },
   {
     "_id": "651a23b0d1e5f4c6a2e9b1d4",
@@ -246,7 +223,7 @@ console.log(project, "proj");
     "description": "Key personnel might not be available for critical project phases.",
     "priority": "high",
     "status": "active",
-    "owner": "John Doe"
+    "owner": "Procurement Manager"
   },
   {
     "_id": "651a23b0d1e5f4c6a2e9b1d6",
@@ -254,94 +231,128 @@ console.log(project, "proj");
     "description": "Additional client requests beyond the initial project scope could extend the timeline.",
     "priority": "medium",
     "status": "active",
-    "owner": "John Doe"
-  }
-]
+    "owner": "Project Manager"
+  }]);
+  console.log(id, "id");
+  const projectLoading = false;
+  // const { id } = useParams();
+  // Fetch project data
+  const project = useMemo(() => {
+    return id ? dataService.getProjectById(id) : undefined;
+  }, [id]);
+  console.log(project, "proj");
+  // Fetch activities data
+  // Get activities data from local service
+  const milestones = useMemo(() => {
+    return project?.projectCode ? dataService.getMilestonesByProjectCode(project.projectCode.toString()) : [];
+  }, [project?.projectCode]);
+
+
+  // Fetch risks
+
+  // const risks = useMemo(() => {
+  //   return project?.projectCode ? dataService.getRisksByProjectCode(project.projectCode.toString()) : [];
+  // }, [project?.projectCode]);
+
+
 
   // Create risk mutation
-  const createRiskMutation = useMutation({
-    mutationFn: async (
-      newRisk: Omit<Risk, "_id" | "createdAt" | "updatedAt">
-    ) => {
-      const response = await fetch("/api/risks", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newRisk),
-      });
-      if (!response.ok) throw new Error("Failed to create risk");
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["/api/risks", project?.projectCode],
-      });
-      setIsAddingRisk(false);
-      setRiskForm({
-        title: "",
-        description: "",
-        status: "active",
-        priority: "medium",
-        owner: "",
-      });
-    },
-  });
+  // const createRiskMutation = useMutation({
+  //   mutationFn: async (
+  //     newRisk: Omit<Risk, "_id" | "createdAt" | "updatedAt">
+  //   ) => {
+  //     const response = await fetch("/api/risks", {
+  //       method: "POST",
+  //       headers: { "Content-Type": "application/json" },
+  //       body: JSON.stringify(newRisk),
+  //     });
+  //     if (!response.ok) throw new Error("Failed to create risk");
+  //     return response.json();
+  //   },
+  //   onSuccess: () => {
+  //     queryClient.invalidateQueries({
+  //       queryKey: ["/api/risks", project?.projectCode],
+  //     });
+  //     setIsAddingRisk(false);
+  //     setRiskForm({
+  //       title: "",
+  //       description: "",
+  //       status: "active",
+  //       priority: "medium",
+  //       owner: "",
+  //     });
+  //   },
+  // });
 
   // Update risk mutation
-  const updateRiskMutation = useMutation({
-    mutationFn: async (updatedRisk: Risk) => {
-      const response = await fetch(`/api/risks/${updatedRisk._id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(updatedRisk),
-      });
-      if (!response.ok) throw new Error("Failed to update risk");
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["/api/risks", project?.projectCode],
-      });
-      setEditingRisk(null);
-      setRiskForm({
-        title: "",
-        description: "",
-        status: "active",
-        priority: "medium",
-        owner: "",
-      });
-    },
-  });
+  // const updateRiskMutation = useMutation({
+  //   mutationFn: async (updatedRisk: Risk) => {
+  //     const response = await fetch(`/api/risks/${updatedRisk._id}`, {
+  //       method: "PUT",
+  //       headers: { "Content-Type": "application/json" },
+  //       body: JSON.stringify(updatedRisk),
+  //     });
+  //     if (!response.ok) throw new Error("Failed to update risk");
+  //     return response.json();
+  //   },
+  //   onSuccess: () => {
+  //     queryClient.invalidateQueries({
+  //       queryKey: ["/api/risks", project?.projectCode],
+  //     });
+  //     setEditingRisk(null);
+  //     setRiskForm({
+  //       title: "",
+  //       description: "",
+  //       status: "active",
+  //       priority: "medium",
+  //       owner: "",
+  //     });
+  //   },
+  // });
 
   // Delete risk mutation
-  const deleteRiskMutation = useMutation({
-    mutationFn: async (riskId: string) => {
-      const response = await fetch(`/api/risks/${riskId}`, {
-        method: "DELETE",
-      });
-      if (!response.ok) throw new Error("Failed to delete risk");
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["/api/risks", project?.projectCode],
-      });
-    },
-  });
+  // const deleteRiskMutation = useMutation({
+  //   mutationFn: async (riskId: string) => {
+  //     const response = await fetch(`/api/risks/${riskId}`, {
+  //       method: "DELETE",
+  //     });
+  //     if (!response.ok) throw new Error("Failed to delete risk");
+  //     return response.json();
+  //   },
+  //   onSuccess: () => {
+  //     queryClient.invalidateQueries({
+  //       queryKey: ["/api/risks", project?.projectCode],
+  //     });
+  //   },
+  // });
 
   const handleCreateRisk = () => {
     if (!project?.projectCode) return;
-    createRiskMutation.mutate({
-      ...riskForm,
+
+    const newRisk: Risk = {
+      _id: crypto.randomUUID(), // or use Date.now().toString() if no uuid
       projectCode: project.projectCode,
-    });
+      ...riskForm,
+    };
+
+    setRisks((prev) => [...prev, newRisk]);
+    setIsAddingRisk(false);
+    setRiskForm({ title: "", description: "", status: "active", priority: "medium", owner: "" });
   };
 
   const handleUpdateRisk = () => {
     if (!editingRisk) return;
-    updateRiskMutation.mutate({
-      ...editingRisk,
-      ...riskForm,
-    });
+
+    setRisks((prev) =>
+      prev.map((risk) =>
+        risk._id === editingRisk._id
+          ? { ...risk, ...riskForm }
+          : risk
+      )
+    );
+
+    setEditingRisk(null);
+    setIsAddingRisk(false);
   };
 
   const handleEditRisk = (risk: Risk) => {
@@ -358,9 +369,10 @@ console.log(project, "proj");
 
   const handleDeleteRisk = (riskId: string) => {
     if (confirm("Are you sure you want to delete this risk?")) {
-      deleteRiskMutation.mutate(riskId);
+      setRisks((prev) => prev.filter((risk) => risk._id !== riskId));
     }
   };
+
 
   const getPriorityBadge = (priority: Risk["priority"]) => {
     const variants = {
@@ -601,52 +613,51 @@ console.log(project, "proj");
   //   enabled: !!project?.projectCode,
   // });
   const upcomingActivities = useMemo(() => {
-      return project?.projectCode ? dataService.getUpcomingActivitiesByProjectCode(project?.projectCode) : undefined;
-    }, [project?.projectCode]);
+    return project?.projectCode ? dataService.getUpcomingActivitiesByProjectCode(project?.projectCode) : undefined;
+  }, [project?.projectCode]);
 
   console.log(upcomingActivities, "upcomingActivities");
   // Transform upcomingActivities to Gantt chart format
   const upComingActivities =
     upcomingActivities && upcomingActivities.length > 0
       ? upcomingActivities.map((activity, idx) => {
-          // Convert Excel serial date to JS Date object
-          const excelSerialToDate = (serial: number | string | undefined) => {
-            if (!serial) return undefined;
-            const serialNum =
-              typeof serial === "string" ? parseInt(serial, 10) : serial;
-            if (isNaN(serialNum)) return undefined;
-            const excelEpoch = new Date(1899, 11, 30);
-            return new Date(excelEpoch.getTime() + serialNum * 24 * 60 * 60 * 1000);
-          };
-          const startDate = excelSerialToDate(activity.startDate);
-          const endDate = excelSerialToDate(activity.finishDate);
+        // Convert Excel serial date to JS Date object
+        const excelSerialToDate = (serial: number | string | undefined) => {
+          if (!serial) return undefined;
+          const serialNum =
+            typeof serial === "string" ? parseInt(serial, 10) : serial;
+          if (isNaN(serialNum)) return undefined;
+          const excelEpoch = new Date(1899, 11, 30);
+          return new Date(excelEpoch.getTime() + serialNum * 24 * 60 * 60 * 1000);
+        };
+        const startDate = excelSerialToDate(activity.startDate);
+        const endDate = excelSerialToDate(activity.finishDate);
 
-          // Set predecessor as the previous activity's id, if exists
-          const dependencies =
-            idx > 0
-              ? [
-                  `Task-${
-                    upcomingActivities[idx - 1].id ??
-                    (idx - 1)
-                  }`,
-                ]
-              : undefined;
+        // Set predecessor as the previous activity's id, if exists
+        const dependencies =
+          idx > 0
+            ? [
+              `Task-${upcomingActivities[idx - 1].id ??
+              (idx - 1)
+              }`,
+            ]
+            : undefined;
 
-          return {
-            start: startDate ?? new Date(),
-            end: endDate ?? new Date(),
-            name: activity.item,
-            id: `Task-${activity.id ?? idx}`,
-            progress:
-              typeof activity.percentageComplete === "string"
-                ? parseFloat(activity.percentageComplete) * 100
-                : (activity.percentageComplete ?? 0) * 100,
-            type: "task",
-            project: activity.projectCode ? `Project-${activity.projectCode}` : undefined,
-            dependencies,
-            hideChildren: false,
-          };
-        })
+        return {
+          start: startDate ?? new Date(),
+          end: endDate ?? new Date(),
+          name: activity.item,
+          id: `Task-${activity.id ?? idx}`,
+          progress:
+            typeof activity.percentageComplete === "string"
+              ? parseFloat(activity.percentageComplete) * 100
+              : (activity.percentageComplete ?? 0) * 100,
+          type: "task",
+          project: activity.projectCode ? `Project-${activity.projectCode}` : undefined,
+          dependencies,
+          hideChildren: false,
+        };
+      })
       : [];
 
   console.log(upComingActivities, "upcomingActivities", upcomingActivities);
@@ -662,9 +673,9 @@ console.log(project, "proj");
   //   },
   //   enabled: !!project?.projectCode,
   // });
-const lateActivities = useMemo(() => {
-      return project?.projectCode ? dataService.getLateActivitiesByProjectCode(project?.projectCode) : undefined;
-    }, [project?.projectCode]);
+  const lateActivities = useMemo(() => {
+    return project?.projectCode ? dataService.getLateActivitiesByProjectCode(project?.projectCode) : undefined;
+  }, [project?.projectCode]);
 
   if (projectLoading || !project) {
     return (
@@ -722,19 +733,19 @@ const lateActivities = useMemo(() => {
       if (bPhase === -1) return -1;
       return aPhase - bPhase;
     });
-    console.log(project,"adii project")
+  console.log(project, "adii project")
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Scroll to top on mount */}
       {React.useEffect(() => {
-      window.scrollTo({ top: 0, behavior: "smooth" });
+        window.scrollTo({ top: 0, behavior: "smooth" });
       }, [])}
       <div className="mb-2 ">
-      <Navbar
-        DisplayTitle={project.projectCode}
-        subtitle={project.description}
-        setSelectedProjectId={setSelectedProjectId}
-      />
+        <Navbar
+          DisplayTitle={project.projectCode}
+          subtitle={project.description}
+          setSelectedProjectId={setSelectedProjectId}
+        />
       </div>
       {/* KPI Cards Row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mx-5">
@@ -824,7 +835,7 @@ const lateActivities = useMemo(() => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-red-600">
-              {4 }
+              {4}
             </div>
             <p className="text-xs text-muted-foreground">Issues & risks</p>
           </CardContent>
@@ -863,15 +874,15 @@ const lateActivities = useMemo(() => {
                   // }
                   // unitOfMeasurement="%"
                   value={
-                        (() => {
-                          // Calculate days remaining
-                          const today = new Date();
-                          const finish = parseExcelDate(project.finishDate);
-                          if (!finish) return "N/A";
-                          const diff = Math.ceil((finish.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-                          return diff >= 0 ? diff : 0;
-                        })()
-                      }
+                    (() => {
+                      // Calculate days remaining
+                      const today = new Date();
+                      const finish = parseExcelDate(project.finishDate);
+                      if (!finish) return "N/A";
+                      const diff = Math.ceil((finish.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+                      return diff >= 0 ? diff : 0;
+                    })()
+                  }
                   scale="days"
                   state={
                     project.performanceIndex == null
@@ -904,10 +915,10 @@ const lateActivities = useMemo(() => {
                     /> */}
 
                     <NumericSideIndicator
-                      number={ `Start: ${formatDateforMilestones(project.startDate)} | Finish: ${formatDateforMilestones(project.finishDate)}`}
+                      number={`Start: ${formatDateforMilestones(project.startDate)} | Finish: ${formatDateforMilestones(project.finishDate)}`}
                       titleText="Project Duration"
                       unit=""
-                      // state="Error"
+                    // state="Error"
                     />
                   </React.Fragment>
                 </AnalyticalCardHeader>
@@ -1556,10 +1567,10 @@ const lateActivities = useMemo(() => {
                   <Button
                     size="sm"
                     onClick={editingRisk ? handleUpdateRisk : handleCreateRisk}
-                    disabled={
-                      createRiskMutation.isPending ||
-                      updateRiskMutation.isPending
-                    }
+                    // disabled={
+                    //   createRiskMutation.isPending ||
+                    //   updateRiskMutation.isPending
+                    // }
                     data-testid="button-save-risk"
                   >
                     {editingRisk ? "Update Risk" : "Add Risk"}
@@ -1586,7 +1597,7 @@ const lateActivities = useMemo(() => {
               </div>
             )}
 
-            { risks && risks.length > 0 ? (
+            {risks && risks.length > 0 ? (
               <Table>
                 <TableHeader>
                   <TableRow>
