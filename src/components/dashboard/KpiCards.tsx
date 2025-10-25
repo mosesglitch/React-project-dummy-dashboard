@@ -34,7 +34,7 @@ export const KpiCards: React.FC<KpiCardsProps> = memo(({ kpiData }) => {
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6">
       <Card
         data-testid="tile-total-projects"
-        className="hover:shadow-md transition-shadow duration-200 border-l-4 border-l-blue-500 focus-within:ring-2 focus-within:ring-blue-500 focus-within:outline-none"
+        className="hover:shadow-md transition-all duration-200 border-l-4 border-l-blue-500 focus-within:ring-2 focus-within:ring-blue-500 focus-within:outline-none hover:scale-[1.02] cursor-pointer transform"
         role="article"
         aria-labelledby="total-projects-title"
         tabIndex={0}
@@ -55,7 +55,7 @@ export const KpiCards: React.FC<KpiCardsProps> = memo(({ kpiData }) => {
         </CardContent>
       </Card>
 
-      <Card data-testid="tile-total-budget" className="hover:shadow-md transition-shadow duration-200 border-l-4 border-l-green-500">
+      <Card data-testid="tile-total-budget" className="hover:shadow-md transition-all duration-200 border-l-4 border-l-green-500 hover:scale-[1.02] cursor-pointer transform">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
           <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-300">Total Budget</CardTitle>
           <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
@@ -72,7 +72,7 @@ export const KpiCards: React.FC<KpiCardsProps> = memo(({ kpiData }) => {
         </CardContent>
       </Card>
 
-      <Card data-testid="tile-actual-spend" className="hover:shadow-md transition-shadow duration-200 border-l-4 border-l-orange-500">
+      <Card data-testid="tile-actual-spend" className="hover:shadow-md transition-all duration-200 border-l-4 border-l-orange-500 hover:scale-[1.02] cursor-pointer transform">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
           <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-300">Actual Spend</CardTitle>
           <div className="p-2 bg-orange-100 dark:bg-orange-900/30 rounded-lg">
@@ -89,7 +89,7 @@ export const KpiCards: React.FC<KpiCardsProps> = memo(({ kpiData }) => {
         </CardContent>
       </Card>
 
-      <Card data-testid="tile-amount-received" className="hover:shadow-md transition-shadow duration-200 border-l-4 border-l-purple-500">
+      <Card data-testid="tile-amount-received" className="hover:shadow-md transition-all duration-200 border-l-4 border-l-purple-500 hover:scale-[1.02] cursor-pointer transform">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
           <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-300">Amount Received</CardTitle>
           <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
@@ -106,7 +106,7 @@ export const KpiCards: React.FC<KpiCardsProps> = memo(({ kpiData }) => {
         </CardContent>
       </Card>
 
-      <Card data-testid="tile-total-risks" className="hover:shadow-md transition-shadow duration-200 border-l-4 border-l-red-500">
+      <Card data-testid="tile-total-risks" className="hover:shadow-md transition-all duration-200 border-l-4 border-l-red-500 hover:scale-[1.02] cursor-pointer transform">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
           <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-300">Total Risks</CardTitle>
           <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-lg">

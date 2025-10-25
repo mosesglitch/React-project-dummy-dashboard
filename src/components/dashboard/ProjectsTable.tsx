@@ -182,6 +182,12 @@ export const ProjectsTable: React.FC<ProjectsTableProps> = memo(({
         </DropdownMenu>
       </CardHeader>
       <CardContent>
+        <div className="sm:hidden mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+          <p className="text-sm text-blue-800 dark:text-blue-200 flex items-center gap-2">
+            <span>💡</span>
+            <span>Tap any project row to view details</span>
+          </p>
+        </div>
         <div className="overflow-x-auto">
           <div className="max-h-[500px] overflow-y-auto">
             <Table
@@ -247,18 +253,22 @@ export const ProjectsTable: React.FC<ProjectsTableProps> = memo(({
                   sortedProjects.map((project) => (
                     <TableRow
                       key={project.id}
-                      className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800"
+                      className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200 relative group"
                       onClick={() => onProjectSelect(project.id)}
                       data-testid={`row-project-${project.projectCode}`}
                     >
                       <TableCell
-                        className="font-medium sticky left-0 bg-white dark:bg-gray-900 z-10 text-blue-600 hover:underline cursor-pointer"
+                        className="font-medium sticky left-0 bg-white dark:bg-gray-900 z-10 text-blue-600 hover:underline cursor-pointer relative"
                         onClick={(e) => {
                           e.stopPropagation();
                           onProjectSelect(project.id);
                         }}
                       >
-                        {project.projectCode}
+                        <div className="flex items-center gap-2">
+                          <span className="sm:hidden text-xs text-gray-500 dark:text-gray-400">📋</span>
+                          <span className="font-semibold">{project.projectCode}</span>
+                          <span className="sm:hidden text-xs text-blue-500 opacity-70">→</span>
+                        </div>
                       </TableCell>
                       <TableCell
                         className="max-w-xs truncate"
@@ -314,9 +324,10 @@ export const ProjectsTable: React.FC<ProjectsTableProps> = memo(({
                             onProjectSelect(project.id);
                           }}
                           data-testid={`button-goto-project-${project.projectCode}`}
-                          className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700"
+                          className="p-1 hover:bg-blue-100 hover:text-blue-600 dark:hover:bg-blue-900/20 dark:hover:text-blue-400 transition-all duration-200 sm:opacity-60 sm:group-hover:opacity-100"
+                          title="View project details"
                         >
-                          <ArrowRight className="h-4 w-4" />
+                          <ArrowRight className="h-4 w-4 sm:h-3 sm:w-3 md:h-4 md:w-4" />
                         </Button>
                       </TableCell>
                     </TableRow>
