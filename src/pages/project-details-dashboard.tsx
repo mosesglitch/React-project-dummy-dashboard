@@ -46,6 +46,9 @@ import {
   Users,
   MapPin,
   Activity,
+  Info,
+  ListTodo,
+  FileText,
 } from "lucide-react";
 import GanttChartView from "@/components/gantt-chart-view";
 import GaugeComponent from "react-gauge-component";
@@ -765,9 +768,112 @@ export default function ProjectDetailsDashboard({ id, setSelectedProjectId }: { 
   // Add swipe indicator animation
   const [showSwipeHint, setShowSwipeHint] = useState(true);
 
+  // Tab navigation state
+  const [activeTab, setActiveTab] = useState('overview');
+  const [showShortcuts, setShowShortcuts] = useState(false);
+  const [activeSection, setActiveSection] = useState('overview-section');
+
+  // Keyboard shortcuts for quick navigation
+  useEffect(() => {
+    const handleKeyPress = (event: KeyboardEvent) => {
+      // Only handle shortcuts when not typing in input fields
+      if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) {
+        return;
+      }
+
+      // Show/hide shortcuts help
+      if (event.key === '?' || (event.key === 'h' && event.ctrlKey)) {
+        event.preventDefault();
+        setShowShortcuts(!showShortcuts);
+        return;
+      }
+
+      // Section navigation shortcuts
+      switch (event.key) {
+        case '1':
+          event.preventDefault();
+          document.getElementById('overview-section')?.scrollIntoView({ behavior: 'smooth' });
+          break;
+        case '2':
+          event.preventDefault();
+          document.getElementById('progress-section')?.scrollIntoView({ behavior: 'smooth' });
+          break;
+        case '3':
+          event.preventDefault();
+          document.getElementById('activities-section')?.scrollIntoView({ behavior: 'smooth' });
+          break;
+        case '4':
+          event.preventDefault();
+          document.getElementById('risks-section')?.scrollIntoView({ behavior: 'smooth' });
+          break;
+        case '5':
+          event.preventDefault();
+          document.getElementById('location-section')?.scrollIntoView({ behavior: 'smooth' });
+          break;
+        case 'Escape':
+          event.preventDefault();
+          setSelectedProjectId("null");
+          break;
+        case 'ArrowLeft':
+          if (event.altKey) {
+            event.preventDefault();
+            setSelectedProjectId("null");
+          }
+          break;
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyPress);
+    return () => document.removeEventListener('keydown', handleKeyPress);
+  }, [showShortcuts, setSelectedProjectId]);
+
   useEffect(() => {
     const timer = setTimeout(() => setShowSwipeHint(false), 3000);
     return () => clearTimeout(timer);
+  }, []);
+
+  // IntersectionObserver to track active section while scrolling
+  useEffect(() => {
+    const sections = [
+      'overview-section',
+      'progress-section',
+      'activities-section',
+      'risks-section',
+      'location-section'
+    ];
+
+    const observerOptions = {
+      root: null,
+      rootMargin: '-20% 0px -70% 0px', // Trigger when section is in the top 30% of viewport
+      threshold: 0
+    };
+
+    const observerCallback = (entries: IntersectionObserverEntry[]) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          setActiveSection(entry.target.id);
+        }
+      });
+    };
+
+    const observer = new IntersectionObserver(observerCallback, observerOptions);
+
+    // Observe all sections
+    sections.forEach((sectionId) => {
+      const element = document.getElementById(sectionId);
+      if (element) {
+        observer.observe(element);
+      }
+    });
+
+    return () => {
+      sections.forEach((sectionId) => {
+        const element = document.getElementById(sectionId);
+        if (element) {
+          observer.unobserve(element);
+        }
+      });
+    };
   }, []);
 
   console.log(project, "adii project")
@@ -793,6 +899,111 @@ export default function ProjectDetailsDashboard({ id, setSelectedProjectId }: { 
           </div>
         </div>
       )}
+
+      {/* Keyboard shortcuts help panel */}
+      {showShortcuts && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                Keyboard Shortcuts
+              </h3>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowShortcuts(false)}
+                className="p-1"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+            <div className="space-y-3 text-sm">
+              <div className="flex justify-between items-center">
+                <span className="text-gray-600 dark:text-gray-400">Overview</span>
+                <kbd className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded text-xs font-mono">1</kbd>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-gray-600 dark:text-gray-400">Progress</span>
+                <kbd className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded text-xs font-mono">2</kbd>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-gray-600 dark:text-gray-400">Activities</span>
+                <kbd className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded text-xs font-mono">3</kbd>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-gray-600 dark:text-gray-400">Risks</span>
+                <kbd className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded text-xs font-mono">4</kbd>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-gray-600 dark:text-gray-400">Location</span>
+                <kbd className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded text-xs font-mono">5</kbd>
+              </div>
+              <div className="border-t pt-3 mt-3">
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600 dark:text-gray-400">Go Back</span>
+                  <kbd className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded text-xs font-mono">Esc</kbd>
+                </div>
+                <div className="flex justify-between items-center mt-2">
+                  <span className="text-gray-600 dark:text-gray-400">Go Back (Alt)</span>
+                  <kbd className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded text-xs font-mono">Alt + ←</kbd>
+                </div>
+                <div className="flex justify-between items-center mt-2">
+                  <span className="text-gray-600 dark:text-gray-400">Show/Hide Help</span>
+                  <kbd className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded text-xs font-mono">?</kbd>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Quick access floating toolbar */}
+      <div className="hidden md:block fixed top-1/2 right-4 transform -translate-y-1/2 z-40">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-2 space-y-1">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowShortcuts(!showShortcuts)}
+            className="w-8 h-8 p-0 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+            title="Keyboard shortcuts (?)"
+          >
+            <span className="text-xs font-mono">?</span>
+          </Button>
+          {[
+            { id: 'overview-section', label: '1', icon: Info, title: 'Overview (1)' },
+            { id: 'progress-section', label: '2', icon: Target, title: 'Progress (2)' },
+            { id: 'activities-section', label: '3', icon: ListTodo, title: 'Activities (3)' },
+            { id: 'risks-section', label: '4', icon: AlertTriangle, title: 'Risks (4)' },
+            { id: 'location-section', label: '5', icon: MapPin, title: 'Location (5)' },
+          ].map((section) => {
+            const Icon = section.icon;
+            const isActive = activeSection === section.id;
+            return (
+              <Button
+                key={section.id}
+                variant="ghost"
+                size="sm"
+                onClick={() => document.getElementById(section.id)?.scrollIntoView({ behavior: 'smooth' })}
+                className={`w-8 h-8 p-0 relative transition-all duration-200 ${
+                  isActive
+                    ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 scale-110'
+                    : 'hover:bg-blue-100 dark:hover:bg-blue-900/30 hover:text-blue-600 dark:hover:text-blue-400'
+                }`}
+                title={section.title}
+              >
+                <Icon className="h-3 w-3" />
+                <span className={`absolute -top-1 -right-1 text-xs font-mono rounded-sm px-1 transition-colors duration-200 ${
+                  isActive
+                    ? 'bg-blue-500 text-white'
+                    : 'bg-gray-200 dark:bg-gray-600 text-gray-600 dark:text-gray-300'
+                }`}>
+                  {section.label}
+                </span>
+              </Button>
+            );
+          })}
+        </div>
+      </div>
 
       {/* Floating back button for mobile - always visible */}
       <div className="md:hidden fixed bottom-6 right-4 z-50">
@@ -905,12 +1116,64 @@ export default function ProjectDetailsDashboard({ id, setSelectedProjectId }: { 
           </CardContent>
         </Card>
       </div>
-      {/* Project Analytics Section - More compact */}
-      <div className="mt-4">
-        <div>
-          <div className="flex flex-col lg:flex-row items-stretch justify-between mb-4 sm:mb-6">
-            <div className="w-full lg:w-[25%] h-full ml-0 lg:ml-5">
-              <Card data-testid="kpi-scope-completion ">
+
+      {/* Tab Navigation */}
+      <div className="mt-6 mx-2 sm:mx-5">
+        <div className="border-b border-gray-200 dark:border-gray-700">
+          <nav className="-mb-px flex space-x-2 sm:space-x-8 overflow-x-auto scrollbar-hide">
+            {[
+              { id: 'overview-section', label: 'Overview', icon: Info, shortcut: '1' },
+              { id: 'progress-section', label: 'Progress', icon: Target, shortcut: '2' },
+              { id: 'activities-section', label: 'Activities', icon: ListTodo, shortcut: '3' },
+              { id: 'risks-section', label: 'Risks', icon: AlertTriangle, shortcut: '4' },
+              { id: 'location-section', label: 'Location', icon: MapPin, shortcut: '5' },
+            ].map((section) => {
+              const Icon = section.icon;
+              const isActive = activeSection === section.id;
+              return (
+                <button
+                  key={section.id}
+                  onClick={() => document.getElementById(section.id)?.scrollIntoView({ behavior: 'smooth' })}
+                  className={`group relative inline-flex items-center py-2 px-1 border-b-2 font-medium text-sm whitespace-nowrap transition-all duration-200 ${
+                    isActive
+                      ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                      : 'border-transparent text-gray-500 hover:text-blue-600 hover:border-blue-300 dark:text-gray-400 dark:hover:text-blue-400'
+                  }`}
+                  title={`${section.label} (${section.shortcut})`}
+                >
+                  <Icon className={`mr-2 h-4 w-4 transition-colors duration-200 ${
+                    isActive
+                      ? 'text-blue-500 dark:text-blue-400'
+                      : 'text-gray-400 group-hover:text-blue-500'
+                  }`} />
+                  <span className="hidden sm:inline">{section.label}</span>
+                  <span className="sm:hidden">{section.label.substring(0, 4)}</span>
+                  <span className={`hidden md:inline-block ml-1 px-1 py-0.5 text-xs font-mono rounded transition-colors duration-200 ${
+                    isActive
+                      ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
+                      : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 group-hover:bg-blue-100 dark:group-hover:bg-blue-900/30 group-hover:text-blue-600 dark:group-hover:text-blue-400'
+                  }`}>
+                    {section.shortcut}
+                  </span>
+                </button>
+              );
+            })}
+          </nav>
+        </div>
+      </div>
+
+      {/* Unified Scrollable Content */}
+      <div className="mt-6 mx-2 sm:mx-5 max-h-[calc(100vh-200px)] overflow-y-auto scrollbar-hide scroll-smooth"
+           style={{ scrollBehavior: 'smooth' }}>
+        <div className="space-y-8 pb-8">
+
+          {/* Overview Section */}
+          <div id="overview-section" className="space-y-6">
+
+            {/* Project Analytics Section */}
+            <div id="project-analytics" className="flex flex-col lg:flex-row items-stretch justify-between gap-6">
+              <div className="w-full lg:w-[25%]">
+              <Card id="project-scope" data-testid="kpi-scope-completion ">
                 {/* <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-0">
                   <CardTitle className="text-sm font-medium">
                     Scope Completion
@@ -1020,12 +1283,12 @@ export default function ProjectDetailsDashboard({ id, setSelectedProjectId }: { 
                   </div>
                 </CardContent>
               </Card>
-            </div>
-            <div className="w-full lg:w-[75%] h-full ml-0 lg:ml-5">
+              </div>
+              <div className="w-full lg:w-[75%]">
               <div className="mb-4">
                 {project && <ProjectAnalytics project={project} />}
               </div>
-              <Card className="h-full">
+              <Card id="milestones" className="h-full">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-0">
                   <CardTitle className="text-sm font-medium">
                     Milestones
@@ -1292,15 +1555,145 @@ export default function ProjectDetailsDashboard({ id, setSelectedProjectId }: { 
                   )}{" "}
                 </CardContent>
               </Card>
-
+              </div>
             </div>
           </div>
 
-        </div>
-      </div>
-      {/* Milestones Section */}
+          {/* Progress Section */}
+          <div id="progress-section" className="space-y-6">
+            <div className="flex items-center gap-3 mb-4">
+              <Target className="h-6 w-6 text-blue-600" />
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Progress</h2>
+            </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Project Performance Metrics */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <BarChart3 className="h-5 w-5 text-blue-600" />
+                  Performance Metrics
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  {/* Scope Progress */}
+                  <div>
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Scope Completion</span>
+                      <span className="text-sm font-bold text-blue-600">{((project.scopeCompletion || 0) * 100).toFixed(0)}%</span>
+                    </div>
+                    <Progress value={(project.scopeCompletion || 0) * 100} className="h-2 mb-1" />
+                    <p className="text-xs text-muted-foreground">Physical work completed</p>
+                  </div>
 
-      {/* Activities Section - More compact */}
+                  {/* Time Progress */}
+                  <div>
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Time Elapsed</span>
+                      <span className="text-sm font-bold text-orange-600">{((project.timeCompletion || 0) * 100).toFixed(0)}%</span>
+                    </div>
+                    <Progress value={Math.min((project.timeCompletion || 0) * 100, 100)} className="h-2 mb-1" />
+                    <p className="text-xs text-muted-foreground">
+                      {(() => {
+                        const today = new Date();
+                        const finish = parseExcelDate(project.finishDate);
+                        if (!finish) return "Schedule timeline";
+                        const diff = Math.ceil((finish.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+                        return diff >= 0 ? `${diff} days remaining` : `${Math.abs(diff)} days overdue`;
+                      })()}
+                    </p>
+                  </div>
+
+                  {/* Performance Index */}
+                  <div>
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Performance Index</span>
+                      <span className={`text-sm font-bold ${(project.performanceIndex || 0) >= 1 ? 'text-green-600' : (project.performanceIndex || 0) >= 0.95 ? 'text-yellow-600' : 'text-red-600'}`}>
+                        {(project.performanceIndex || 0).toFixed(2)}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                        <div
+                          className={`h-2 rounded-full transition-all duration-300 ${(project.performanceIndex || 0) >= 1 ? 'bg-green-500' : (project.performanceIndex || 0) >= 0.95 ? 'bg-yellow-500' : 'bg-red-500'}`}
+                          style={{ width: `${Math.min((project.performanceIndex || 0) * 100, 100)}%` }}
+                        />
+                      </div>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {(project.performanceIndex || 0) >= 1 ? 'Ahead of schedule' : (project.performanceIndex || 0) >= 0.95 ? 'On track' : 'Behind schedule'}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Budget & Financial Progress */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <DollarSign className="h-5 w-5 text-green-600" />
+                  Financial Progress
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  {/* Budget Utilization */}
+                  <div>
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Budget Spent</span>
+                      <span className="text-sm font-bold text-orange-600">{((project.budgetSpent || 0) * 100).toFixed(1)}%</span>
+                    </div>
+                    <Progress value={(project.budgetSpent || 0) * 100} className="h-2 mb-1" />
+                    <div className="flex justify-between text-xs text-muted-foreground">
+                      <span>Spent: {formatCurrency(project.totalAmountSpent)}</span>
+                      <span>Budget: {formatCurrency(project.budgetAmount)}</span>
+                    </div>
+                  </div>
+
+                  {/* Margin Progress */}
+                  <div>
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Projected vs Actual Margin</span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="text-center p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                        <div className="text-lg font-bold text-blue-600">{((project.projectedGrossMargin || 0) * 100).toFixed(1)}%</div>
+                        <div className="text-xs text-muted-foreground">Projected</div>
+                      </div>
+                      <div className="text-center p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                        <div className="text-lg font-bold text-green-600">{((project.actualGrossMargin || 0) * 100).toFixed(1)}%</div>
+                        <div className="text-xs text-muted-foreground">Actual</div>
+                      </div>
+                    </div>
+                    <div className="mt-2 text-center">
+                      <span className={`text-sm font-medium ${(project.deviationProfitMargin || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        {(project.deviationProfitMargin || 0) >= 0 ? '+' : ''}{((project.deviationProfitMargin || 0) * 100).toFixed(1)}% deviation
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Amount Received */}
+                  <div>
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Revenue Received</span>
+                      <span className="text-sm font-bold text-green-600">{project.amountReceived || 'N/A'}</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground">Cash flow and collections status</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+          </div>
+
+          {/* Activities Section */}
+          <div id="activities-section" className="space-y-6">
+            <div className="flex items-center gap-3 mb-4">
+              <ListTodo className="h-6 w-6 text-blue-600" />
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Activities</h2>
+            </div>
+            {/* Activities Section - More compact */}
       <div className="mt-4 mb-4">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
           {/* Upcoming Activities - 3/4 width */}
@@ -1418,8 +1811,16 @@ export default function ProjectDetailsDashboard({ id, setSelectedProjectId }: { 
           </Card>
         </div>
       </div>
-      {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          </div>
+
+          {/* Risks Section */}
+          <div id="risks-section" className="space-y-6">
+            <div className="flex items-center gap-3 mb-4">
+              <AlertTriangle className="h-6 w-6 text-blue-600" />
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Risks</h2>
+            </div>
+            {/* Main Content Grid */}
+            <div className="grid grid-cols-1 gap-6">
         {/* Budget & Financial Details */}
         {/* <Card data-testid="card-budget-details">
             <CardHeader>
@@ -1729,190 +2130,30 @@ export default function ProjectDetailsDashboard({ id, setSelectedProjectId }: { 
         </Card> */}
 
         {/* Budget Consumption Chart */}
-      </div>
-
-      {/* <div className="mt-6">
-        <Card data-testid="card-budget-chart" className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <BarChart3 className="h-5 w-5" />
-              Budget vs Time vs Scope Analysis
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-6">
-              <div className="space-y-4">
-                <h4 className="text-sm font-medium text-muted-foreground">
-                  Performance Comparison
-                </h4>
-
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span>Budget Consumption</span>
-                    <span
-                      className={`font-medium ${
-                        (project.budgetSpent || 0) >
-                        (project.scopeCompletion || 0)
-                          ? "text-red-600"
-                          : "text-green-600"
-                      }`}
-                    >
-                      {((project.budgetSpent || 0) * 100).toFixed(1)}%
-                    </span>
-                  </div>
-                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
-                    <div
-                      className={`h-3 rounded-full transition-all duration-300 ${
-                        (project.budgetSpent || 0) >
-                        (project.scopeCompletion || 0)
-                          ? "bg-red-500"
-                          : "bg-green-500"
-                      }`}
-                      style={{
-                        width: `${Math.min(
-                          (project.budgetSpent || 0) * 100,
-                          100
-                        )}%`,
-                      }}
-                    ></div>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span>Scope Completion</span>
-                    <span className="font-medium text-blue-600">
-                      {((project.scopeCompletion || 0) * 100).toFixed(1)}%
-                    </span>
-                  </div>
-                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
-                    <div
-                      className="h-3 rounded-full bg-blue-500 transition-all duration-300"
-                      style={{
-                        width: `${(project.scopeCompletion || 0) * 100}%`,
-                      }}
-                    ></div>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span>Time Elapsed</span>
-                    <span
-                      className={`font-medium ${
-                        (project.timeCompletion || 0) > 1
-                          ? "text-red-600"
-                          : "text-orange-600"
-                      }`}
-                    >
-                      {((project.timeCompletion || 0) * 100).toFixed(1)}%
-                    </span>
-                  </div>
-                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
-                    <div
-                      className={`h-3 rounded-full transition-all duration-300 ${
-                        (project.timeCompletion || 0) > 1
-                          ? "bg-red-500"
-                          : "bg-orange-500"
-                      }`}
-                      style={{
-                        width: `${Math.min(
-                          (project.timeCompletion || 0) * 100,
-                          100
-                        )}%`,
-                      }}
-                    ></div>
-                  </div>
-                </div>
-                <div className="grid grid-cols-3 gap-3 pt-2 border-t">
-                  <div className="text-center">
-                    <p className="text-xs text-muted-foreground">
-                      Budget Efficiency
-                    </p>
-                    <p
-                      className={`text-sm font-bold ${
-                        (project.scopeCompletion || 0) >
-                        (project.budgetSpent || 0)
-                          ? "text-green-600"
-                          : "text-red-600"
-                      }`}
-                    >
-                      {(project.scopeCompletion || 0) > 0
-                        ? (
-                            ((project.scopeCompletion || 0) /
-                              (project.budgetSpent || 0.01)) *
-                            100
-                          ).toFixed(0) + "%"
-                        : "N/A"}
-                    </p>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-xs text-muted-foreground">
-                      Schedule Performance
-                    </p>
-                    <p
-                      className={`text-sm font-bold ${
-                        (project.scopeCompletion || 0) >
-                        (project.timeCompletion || 0)
-                          ? "text-green-600"
-                          : "text-red-600"
-                      }`}
-                    >
-                      {(project.timeCompletion || 0) > 0
-                        ? (
-                            ((project.scopeCompletion || 0) /
-                              (project.timeCompletion || 0.01)) *
-                            100
-                          ).toFixed(0) + "%"
-                        : "N/A"}
-                    </p>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-xs text-muted-foreground">
-                      Overall Index
-                    </p>
-                    <p className="text-sm font-bold text-blue-600">
-                      {(project.performanceIndex || 0).toFixed(2)}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-3 gap-4 pt-4 border-t">
-                <div className="text-center">
-                  <p className="text-xs text-muted-foreground">Budget</p>
-                  <p className="text-lg font-bold">
-                    {formatCurrency(project.budgetAmount)}
-                  </p>
-                </div>
-                <div className="text-center">
-                  <p className="text-xs text-muted-foreground">Spent</p>
-                  <p className="text-lg font-bold text-orange-600">
-                    {formatCurrency(project.totalAmountSpent)}
-                  </p>
-                </div>
-                <div className="text-center">
-                  <p className="text-xs text-muted-foreground">Remaining</p>
-                  <p className="text-lg font-bold text-green-600">
-                    {formatCurrency(
-                      Math.max(
-                        0,
-                        project.budgetAmount - project.totalAmountSpent
-                      )
-                    )}
-                  </p>
-                </div>
-              </div>
             </div>
-          </CardContent>
-        </Card>
-      </div> */}
+          </div>
 
-      {/* Project Location Map */}
-      {/* <div className="mt-6">
-        <ProjectMap projects={project ? [project] : []} />
-      </div> */}
+          {/* Location Section */}
+          <div id="location-section" className="space-y-6">
+            <div className="flex items-center gap-3 mb-4">
+              <MapPin className="h-6 w-6 text-blue-600" />
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Location</h2>
+            </div>
+            {/* Project Location Map */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <MapPin className="h-5 w-5" />
+                  Project Location
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ProjectMap projects={project ? [project] : []} />
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
     </div>
-    // </div>
   );
 }
