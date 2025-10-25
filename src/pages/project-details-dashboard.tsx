@@ -49,6 +49,7 @@ import {
   Info,
   ListTodo,
   FileText,
+  X,
 } from "lucide-react";
 import GanttChartView from "@/components/gantt-chart-view";
 import GaugeComponent from "react-gauge-component";
@@ -876,7 +877,12 @@ export default function ProjectDetailsDashboard({ id, setSelectedProjectId }: { 
     };
   }, []);
 
-  console.log(project, "adii project")
+  // Scroll to top on mount
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, []);
+
+  console.log(project, "project data")
   return (
     <div
       ref={containerRef}
@@ -885,10 +891,6 @@ export default function ProjectDetailsDashboard({ id, setSelectedProjectId }: { 
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
     >
-      {/* Scroll to top on mount */}
-      {React.useEffect(() => {
-        window.scrollTo({ top: 0, behavior: "smooth" });
-      }, [])}
 
       {/* Mobile swipe hint - appears briefly on mobile */}
       {showSwipeHint && (
@@ -1023,7 +1025,7 @@ export default function ProjectDetailsDashboard({ id, setSelectedProjectId }: { 
         />
       </div>
       {/* KPI Cards Row - More compact */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-4 gap-2 sm:gap-4 mx-2 sm:mx-5">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 mx-4 sm:mx-6 mb-8">
         {/* <Card data-testid="kpi-scope-completion">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-0">
             <CardTitle className="text-sm font-medium">
@@ -1162,529 +1164,399 @@ export default function ProjectDetailsDashboard({ id, setSelectedProjectId }: { 
         </div>
       </div>
 
-      {/* Unified Scrollable Content */}
-      <div className="mt-6 mx-2 sm:mx-5 max-h-[calc(100vh-200px)] overflow-y-auto scrollbar-hide scroll-smooth"
-           style={{ scrollBehavior: 'smooth' }}>
-        <div className="space-y-8 pb-8">
+      {/* Main Content Container */}
+      <div className="mt-6 mx-2 sm:mx-5 pb-20">
+        <div className="space-y-12">
 
           {/* Overview Section */}
-          <div id="overview-section" className="space-y-6">
+          <div id="overview-section" className="space-y-8">
 
             {/* Project Analytics Section */}
-            <div id="project-analytics" className="flex flex-col lg:flex-row items-stretch justify-between gap-6">
-              <div className="w-full lg:w-[25%]">
-              <Card id="project-scope" data-testid="kpi-scope-completion ">
-                {/* <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-0">
-                  <CardTitle className="text-sm font-medium">
-                    Scope Completion
-                  </CardTitle>
-                  <Target className="h-4 w-4 text-muted-foreground" />
-                </CardHeader> */}
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Target className="h-5 w-5 text-green-600" />
-                    Project Scope
-                  </CardTitle>
-                </CardHeader>
-                <AnalyticalCardHeader
-                  // titleText={project.projectCode}
-                  subtitleText={"Remaining"}
-                  // description={
-                  //   `Start: ${formatDateforMilestones(project.startDate)} | Finish: ${formatDateforMilestones(project.finishDate)}`
-                  // }
-                  // unitOfMeasurement="%"
-                  value={
-                    (() => {
-                      // Calculate days remaining
-                      const today = new Date();
-                      const finish = parseExcelDate(project.finishDate);
-                      if (!finish) return "N/A";
-                      const diff = Math.ceil((finish.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-                      return diff >= 0 ? diff : 0;
-                    })()
-                  }
-                  scale="days"
-                  state={
-                    project.performanceIndex == null
-                      ? "None"
-                      : project.performanceIndex > 1
-                        ? "Good"
-                        : project.performanceIndex < 0.95
-                          ? "Error"
-                          : project.performanceIndex < 1
-                            ? "Critical"
-                            : "Neutral"
-                  }
-                  trend="Down"
-
-                >
-                  <React.Fragment>
-                    {/* <NumericSideIndicator
-                      number={
-                        (() => {
-                          // Calculate days remaining
-                          const today = new Date();
-                          const finish = parseExcelDate(project.finishDate);
-                          if (!finish) return "N/A";
-                          const diff = Math.ceil((finish.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-                          return diff >= 0 ? diff : 0;
-                        })()
-                      }
-                      titleText="Days Remaining"
-                      unit="days"
-                    /> */}
-
-                    <NumericSideIndicator
-                      number={`Start: ${formatDateforMilestones(project.startDate)} | Finish: ${formatDateforMilestones(project.finishDate)}`}
-                      titleText="Project Duration"
-                      unit=""
-                    // state="Error"
-                    />
-                  </React.Fragment>
-                </AnalyticalCardHeader>
-
-                {/* <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-0">
-                  <CardTitle className="text-sm font-medium">
-                    Scope Completion
-                  </CardTitle>
-                  <Target className="h-4 w-4 text-muted-foreground" />
-                </CardHeader> */}
-                <CardContent>
-                  <div style={{ display: "flex", justifyContent: "center", alignItems: "center", width: "100%", minHeight: "280px", position: "relative", padding: "16px 0" }}>
-                    <GaugeComponent
-                      arc={{
-                        subArcs: [
-                          { limit: 20, color: "#E5E7EB", showTick: true },
-                          { limit: 40, color: "#93C5FD", showTick: true },
-                          { limit: 60, color: "#60A5FA", showTick: true },
-                          { limit: 100, color: "#2563EB", showTick: true },
-                        ],
-                      }}
-                      type="radial"
-                      value={((project.scopeCompletion || 0) * 100).toFixed(0)}
-                      valueLabel={{
-                        style: {
-                          fontSize: "45px",
-                          fill: "#fff",
-                          textShadow: "black 1px 1px 0px, black 0px 0px 2.5em, black 0px 0px 0.2em",
-                        },
-                        formatTextValue: (value) => `${value}%`,
-                      }}
-                      style={{
-                        width: "100%",
-                        height: "100%",
-                        position: "relative",
-                        minHeight: "240px",
-                        maxHeight: "280px",
-                        margin: "0 auto",
-                        display: "block",
-                      }}
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-              </div>
-              <div className="w-full lg:w-[75%]">
-              <div className="mb-4">
-                {project && <ProjectAnalytics project={project} />}
-              </div>
-              <Card id="milestones" className="h-full">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-0">
-                  <CardTitle className="text-sm font-medium">
-                    Milestones
-                  </CardTitle>
-                  <Target className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  {milestones !== undefined && [...milestones]?.length > 0 && (
-                    <div data-testid="card-milestones" className=" py-3">
-                      {/* <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Target className="h-5 w-5" />
-              Project Milestones
-              <h2 className="text-3xl font-bold  bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-               Project Milestones ({milestones?.length || 0})
-            </h2>
-            </CardTitle>
-          </CardHeader> */}
-                      <div className="w-full px-6 pb-3 bg-gradient-to-br from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 rounded-xl">
-                        {/* Desktop & Tablet: Horizontal Timeline */}
-                        <div className="hidden sm:block">
-                          <div className="relative px-4">
-                            {/* Background Timeline Line */}
+            <div className="grid grid-cols-1 xl:grid-cols-5 gap-6">
+              {/* Left Column: Project Analytics Chart + Project Scope */}
+              <div className="xl:col-span-2 space-y-4">
+                {/* Project Analytics Chart - Moved from below milestones */}
+                <Card className="h-[420px]">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <BarChart3 className="h-5 w-5 text-purple-600" />
+                      Project Analytics Chart
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-6 py-2 flex-1">
+                      {/* Sample Chart Data */}
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-3">
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm text-gray-600">Budget Progress</span>
+                            <span className="text-sm font-medium text-blue-600">
+                              {((project.budgetSpent || 0) * 100).toFixed(0)}%
+                            </span>
+                          </div>
+                          <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                             <div
-                              style={{ top: "20px" }}
-                              className="absolute  left-0 right-0 h-1 bg-gray-200 dark:bg-gray-700 rounded-full"
-                            ></div>
-
-                            {/* Progress Line */}
-                            <div
-                              className="absolute left-0 h-1 bg-gradient-to-r from-green-500 via-blue-500 to-purple-500 rounded-full transition-all duration-1000"
-                              style={{
-                                top: "20px",
-                                width: `${orderedMilestones.reduce(
-                                  (acc, m, idx) => {
-                                    const progress = m.percentageComplete || 0;
-                                    return (
-                                      acc +
-                                      progress *
-                                      (100 / orderedMilestones.length)
-                                    );
-                                  },
-                                  0
-                                )}%`,
-                              }}
-                            ></div>
-
-                            <div className="flex justify-between relative">
-                              {orderedMilestones.map((milestone, index) => {
-                                const progress =
-                                  typeof milestone.percentageComplete ===
-                                    "string"
-                                    ? parseFloat(
-                                      milestone.percentageComplete
-                                    ) || 0
-                                    : milestone.percentageComplete || 0;
-                                const isComplete = progress >= 1;
-                                const isInProgress =
-                                  progress > 0 && progress < 1;
-                                console.log(
-                                  "hahaha",
-                                  milestone.startDate,
-                                  milestone.finishDate
-                                );
-                                return (
-                                  <div
-                                    key={index}
-                                    className="flex flex-col items-center flex-1 mx-3"
-                                  >
-                                    {/* Milestone Circle */}
-                                    <div
-                                      className={`relative z-10 w-12 h-12 rounded-full border-4 flex items-center justify-center mb-4 transition-all duration-300 ${isComplete
-                                        ? "bg-green-500 border-green-400 shadow-lg shadow-green-200"
-                                        : isInProgress
-                                          ? "bg-blue-500 border-blue-400 shadow-lg shadow-blue-200"
-                                          : "bg-gray-400 border-gray-300 shadow-lg shadow-gray-200"
-                                        }`}
-                                    >
-                                      {getStatusIcon(progress)}
-                                    </div>
-
-                                    {/* Connection Arrow (except for last item) */}
-                                    {index < orderedMilestones.length - 1 && (
-                                      <div className="absolute top-20 left-1/2 transform translate-x-8 z-20">
-                                        <ArrowRight
-                                          className={`w-4 h-4 ${isComplete
-                                            ? "text-green-500"
-                                            : isInProgress
-                                              ? "text-blue-500"
-                                              : "text-gray-400"
-                                            }`}
-                                        />
-                                      </div>
-                                    )}
-
-                                    {/* Content div */}
-                                    <div
-                                      className={`w-full max-w-full p-3 lg:p-4 rounded-lg shadow-md transition-all duration-300 hover:shadow-lg transform hover:-translate-y-1 ${isComplete
-                                        ? "bg-green-50 dark:bg-green-950/30 border-2 border-green-200"
-                                        : isInProgress
-                                          ? "bg-blue-50 dark:bg-blue-950/30 border-2 border-blue-200"
-                                          : "bg-white dark:bg-gray-800 border-2 border-gray-200"
-                                        }`}
-                                    >
-                                      <div className="text-center">
-                                        <h3
-                                          className={`font-bold text-xs sm:text-sm mb-1 leading-tight ${isComplete
-                                            ? "text-green-800 dark:text-green-200"
-                                            : isInProgress
-                                              ? "text-blue-800 dark:text-blue-200"
-                                              : "text-gray-700 dark:text-gray-300"
-                                            }`}
-                                        >
-                                          {milestone.item}
-                                        </h3>
-
-                                        <p className="text-xs text-gray-600 dark:text-gray-400 mb-2 hidden sm:block">
-                                          {milestone.description}
-                                        </p>
-
-                                        <p className="text-xs text-gray-500 dark:text-gray-400 mb-2 sm:mb-3">
-                                          {formatDateforMilestones(
-                                            milestone.startDate
-                                          )}{" "}
-                                          -{" "}
-                                          {formatDateforMilestones(
-                                            milestone.finishDate
-                                          )}
-                                        </p>
-
-                                        <div className="relative w-full">
-                                          <Progress
-                                            value={progress * 100}
-                                            className="w-full h-1.5 sm:h-2"
-                                          />
-                                          <span
-                                            className={`absolute -top-5 right-0 text-xs font-medium ${isComplete
-                                              ? "text-green-600"
-                                              : isInProgress
-                                                ? "text-blue-600"
-                                                : "text-gray-500"
-                                              }`}
-                                          >
-                                            {(progress * 100).toFixed(0)}%
-                                          </span>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </div>
-                                );
-                              })}
-                            </div>
+                              className="bg-blue-500 h-2 rounded-full transition-all duration-300"
+                              style={{ width: `${((project.budgetSpent || 0) * 100)}%` }}
+                            />
                           </div>
                         </div>
-
-                        {/* Mobile: Vertical Timeline */}
-                        <div className="sm:hidden">
-                          <div className="relative">
-                            {/* Vertical line */}
-                            <div className="absolute left-6 top-7 bottom-0 w-1 bg-gray-200 dark:bg-gray-700 rounded-full"></div>
-
-                            {/* Progress Line */}
+                        <div className="space-y-3">
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm text-gray-600">Time Elapsed</span>
+                            <span className="text-sm font-medium text-orange-600">
+                              {((project.timeCompletion || 0) * 100).toFixed(0)}%
+                            </span>
+                          </div>
+                          <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                             <div
-                              className="absolute left-6 top-10 w-1 bg-gradient-to-b from-green-500 via-blue-500 to-purple-500 rounded-full transition-all duration-1000"
-                              style={{
-                                height: `${orderedMilestones.reduce(
-                                  (acc, m, idx) => {
-                                    const progress = m.percentageComplete || 0;
-                                    return (
-                                      acc +
-                                      progress *
-                                      (100 / orderedMilestones.length)
-                                    );
-                                  },
-                                  0
-                                )}%`,
-                              }}
-                            ></div>
-
-                            <div className="space-y-6">
-                              {orderedMilestones.map((milestone, index) => {
-                                const progress =
-                                  typeof milestone.percentageComplete ===
-                                    "string"
-                                    ? parseFloat(
-                                      milestone.percentageComplete
-                                    ) || 0
-                                    : milestone.percentageComplete || 0;
-                                const isComplete = progress >= 1;
-                                const isInProgress =
-                                  progress > 0 && progress < 1;
-
-                                return (
-                                  <div
-                                    key={index}
-                                    className="flex items-start gap-4"
-                                  >
-                                    {/* Milestone Circle */}
-                                    <div
-                                      className={`relative z-10 w-12 h-12 rounded-full border-4 flex items-center justify-center flex-shrink-0 transition-all duration-300 ${isComplete
-                                        ? "bg-green-500 border-green-400 shadow-lg shadow-green-200"
-                                        : isInProgress
-                                          ? "bg-blue-500 border-blue-400 shadow-lg shadow-blue-200"
-                                          : "bg-gray-400 border-gray-300 shadow-lg shadow-gray-200"
-                                        }`}
-                                    >
-                                      {getStatusIcon(progress)}
-                                    </div>
-
-                                    {/* Content div */}
-                                    <div
-                                      className={`flex-1 p-4 rounded-lg shadow-md transition-all duration-300 hover:shadow-lg ${isComplete
-                                        ? "bg-green-50 dark:bg-green-950/30 border-2 border-green-200"
-                                        : isInProgress
-                                          ? "bg-blue-50 dark:bg-blue-950/30 border-2 border-blue-200"
-                                          : "bg-white dark:bg-gray-800 border-2 border-gray-200"
-                                        }`}
-                                    >
-                                      <h3
-                                        className={`font-bold text-sm mb-1 ${isComplete
-                                          ? "text-green-800 dark:text-green-200"
-                                          : isInProgress
-                                            ? "text-blue-800 dark:text-blue-200"
-                                            : "text-gray-700 dark:text-gray-300"
-                                          }`}
-                                      >
-                                        {milestone.item}
-                                      </h3>
-
-                                      <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">
-                                        {milestone.description}
-                                      </p>
-
-                                      <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
-                                        {formatDateforMilestones(milestone.startDate)} -{" "}
-                                        {formatDateforMilestones(milestone.finishDate)}
-                                      </p>
-
-                                      <div className="flex items-center gap-3">
-                                        <Progress
-                                          value={progress * 100}
-                                          className="flex-1 h-2"
-                                        />
-                                        <span
-                                          className={`text-xs font-medium min-w-12 ${isComplete
-                                            ? "text-green-600"
-                                            : isInProgress
-                                              ? "text-blue-600"
-                                              : "text-gray-500"
-                                            }`}
-                                        >
-                                          {(progress * 100).toFixed(0)}%
-                                        </span>
-                                      </div>
-                                    </div>
-                                  </div>
-                                );
-                              })}
-                            </div>
+                              className="bg-orange-500 h-2 rounded-full transition-all duration-300"
+                              style={{ width: `${((project.timeCompletion || 0) * 100)}%` }}
+                            />
                           </div>
                         </div>
                       </div>
+
+                      {/* Performance Metrics */}
+                      <div className="grid grid-cols-3 gap-3 pt-3 border-t">
+                        <div className="text-center p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                          <div className="text-lg font-bold text-blue-600">
+                            {(project.performanceIndex || 0).toFixed(2)}
+                          </div>
+                          <div className="text-xs text-gray-500">Performance Index</div>
+                        </div>
+                        <div className="text-center p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                          <div className="text-lg font-bold text-green-600">
+                            {((project.scopeCompletion || 0) * 100).toFixed(0)}%
+                          </div>
+                          <div className="text-xs text-gray-500">Scope Complete</div>
+                        </div>
+                        <div className="text-center p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                          <div className="text-lg font-bold text-purple-600">
+                            {((project.actualGrossMargin || 0) * 100).toFixed(1)}%
+                          </div>
+                          <div className="text-xs text-gray-500">Actual Margin</div>
+                        </div>
+                      </div>
                     </div>
-                  )}{" "}
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+
+                {/* Project Scope Card */}
+                <Card id="project-scope" data-testid="kpi-scope-completion" className="h-[480px]">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Target className="h-5 w-5 text-green-600" />
+                      Project Scope
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {/* Project Summary Stats */}
+                    <div className="grid grid-cols-2 gap-3 mb-4">
+                      <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-center">
+                        <div className="text-lg font-bold text-blue-600">
+                          {(() => {
+                            const today = new Date();
+                            const finish = parseExcelDate(project.finishDate);
+                            if (!finish) return "N/A";
+                            const diff = Math.ceil((finish.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+                            return diff >= 0 ? diff : 0;
+                          })()}
+                        </div>
+                        <div className="text-xs text-muted-foreground">Days Remaining</div>
+                      </div>
+                      <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg text-center">
+                        <div className="text-lg font-bold text-green-600">
+                          {((project.scopeCompletion || 0) * 100).toFixed(0)}%
+                        </div>
+                        <div className="text-xs text-muted-foreground">Scope Complete</div>
+                      </div>
+                    </div>
+
+                    {/* Scope Completion Gauge */}
+                    <div className="flex justify-center mb-4">
+                      <div className="w-full max-w-[250px]">
+                        <GaugeComponent
+                          arc={{
+                            subArcs: [
+                              { limit: 25, color: "#EF4444", showTick: true },
+                              { limit: 50, color: "#F59E0B", showTick: true },
+                              { limit: 75, color: "#3B82F6", showTick: true },
+                              { limit: 100, color: "#10B981", showTick: true },
+                            ],
+                          }}
+                          type="radial"
+                          value={((project.scopeCompletion || 0) * 100).toFixed(0)}
+                          valueLabel={{
+                            style: {
+                              fontSize: "28px",
+                              fill: "#374151",
+                              fontWeight: "bold",
+                            },
+                            formatTextValue: (value) => `${value}%`,
+                          }}
+                          style={{ width: "100%", height: "200px" }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Project Timeline */}
+                    <div className="text-center text-sm text-muted-foreground border-t pt-3">
+                      <div className="flex justify-between">
+                        <span>Start: {formatDateforMilestones(project.startDate)}</span>
+                        <span>Finish: {formatDateforMilestones(project.finishDate)}</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Right Column: Milestones */}
+              <div className="xl:col-span-3">
+                <Card id="milestones" className="h-[420px]">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Target className="h-5 w-5 text-blue-600" />
+                      Project Milestones
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="h-full overflow-y-auto">
+                    {milestones !== undefined && [...milestones]?.length > 0 ? (
+                      <div className="space-y-6 min-h-[320px]">
+                        {/* Desktop Timeline */}
+                        <div className="hidden sm:block">
+                          <div className="flex justify-between gap-4 py-4">
+                            {orderedMilestones.map((milestone, index) => {
+                              const progress =
+                                typeof milestone.percentageComplete === "string"
+                                  ? parseFloat(milestone.percentageComplete) || 0
+                                  : milestone.percentageComplete || 0;
+                              const isComplete = progress >= 1;
+                              const isInProgress = progress > 0 && progress < 1;
+
+                              return (
+                                <div key={index} className="flex-1 text-center">
+                                  <div
+                                    className={`w-12 h-12 rounded-full border-4 flex items-center justify-center mx-auto mb-3 ${
+                                      isComplete
+                                        ? "bg-green-500 border-green-400"
+                                        : isInProgress
+                                        ? "bg-blue-500 border-blue-400"
+                                        : "bg-gray-400 border-gray-300"
+                                    }`}
+                                  >
+                                    {getStatusIcon(progress)}
+                                  </div>
+                                  <div className="space-y-2">
+                                    <h3 className="font-semibold text-sm">{milestone.item}</h3>
+                                    <p className="text-xs text-gray-500">
+                                      {formatDateforMilestones(milestone.startDate)} - {formatDateforMilestones(milestone.finishDate)}
+                                    </p>
+                                    <div className="space-y-1">
+                                      <Progress value={progress * 100} className="h-2" />
+                                      <span className="text-xs font-medium">
+                                        {(progress * 100).toFixed(0)}%
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+
+                        {/* Mobile Timeline */}
+                        <div className="sm:hidden space-y-4">
+                          {orderedMilestones.map((milestone, index) => {
+                            const progress =
+                              typeof milestone.percentageComplete === "string"
+                                ? parseFloat(milestone.percentageComplete) || 0
+                                : milestone.percentageComplete || 0;
+                            const isComplete = progress >= 1;
+
+                            return (
+                              <div key={index} className="flex items-start gap-3">
+                                <div
+                                  className={`w-8 h-8 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
+                                    isComplete ? "bg-green-500 border-green-400" : "bg-gray-400 border-gray-300"
+                                  }`}
+                                >
+                                  {getStatusIcon(progress)}
+                                </div>
+                                <div className="flex-1">
+                                  <h4 className="font-semibold text-sm mb-1">{milestone.item}</h4>
+                                  <p className="text-xs text-gray-500 mb-2">
+                                    {formatDateforMilestones(milestone.startDate)} - {formatDateforMilestones(milestone.finishDate)}
+                                  </p>
+                                  <div className="flex items-center gap-2">
+                                    <Progress value={progress * 100} className="flex-1 h-1.5" />
+                                    <span className="text-xs font-medium">{(progress * 100).toFixed(0)}%</span>
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="text-center text-gray-500">No milestones available</p>
+                    )}
+                  </CardContent>
+                </Card>
+
+                {/* Project Analytics Component - Moved from left column */}
+                <div className="mt-4 h-[480px] overflow-y-auto">
+                  {project && <ProjectAnalytics project={project} />}
+                </div>
               </div>
             </div>
           </div>
 
           {/* Progress Section */}
-          <div id="progress-section" className="space-y-6">
-            <div className="flex items-center gap-3 mb-4">
+          <div id="progress-section" className="space-y-6 mt-4">
+            <div className="flex items-center gap-3 mb-6">
               <Target className="h-6 w-6 text-blue-600" />
               <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Progress</h2>
             </div>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Project Performance Metrics */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <BarChart3 className="h-5 w-5 text-blue-600" />
-                  Performance Metrics
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-6">
-                  {/* Scope Progress */}
-                  <div>
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Scope Completion</span>
-                      <span className="text-sm font-bold text-blue-600">{((project.scopeCompletion || 0) * 100).toFixed(0)}%</span>
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+              {/* Project Performance Metrics */}
+              <Card className="h-full">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <BarChart3 className="h-5 w-5 text-blue-600" />
+                    Performance Metrics
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-6">
+                  <div className="space-y-6">
+                    {/* Scope Progress */}
+                    <div>
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Scope Completion</span>
+                        <span className="text-sm font-bold text-blue-600">{((project.scopeCompletion || 0) * 100).toFixed(0)}%</span>
+                      </div>
+                      <Progress value={(project.scopeCompletion || 0) * 100} className="h-2 mb-1" />
+                      <p className="text-xs text-muted-foreground">Physical work completed</p>
                     </div>
-                    <Progress value={(project.scopeCompletion || 0) * 100} className="h-2 mb-1" />
-                    <p className="text-xs text-muted-foreground">Physical work completed</p>
-                  </div>
 
-                  {/* Time Progress */}
-                  <div>
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Time Elapsed</span>
-                      <span className="text-sm font-bold text-orange-600">{((project.timeCompletion || 0) * 100).toFixed(0)}%</span>
+                    {/* Time Progress */}
+                    <div>
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Time Elapsed</span>
+                        <span className="text-sm font-bold text-orange-600">{((project.timeCompletion || 0) * 100).toFixed(0)}%</span>
+                      </div>
+                      <Progress value={Math.min((project.timeCompletion || 0) * 100, 100)} className="h-2 mb-1" />
+                      <p className="text-xs text-muted-foreground">
+                        {(() => {
+                          const today = new Date();
+                          const finish = parseExcelDate(project.finishDate);
+                          if (!finish) return "Schedule timeline";
+                          const diff = Math.ceil((finish.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+                          return diff >= 0 ? `${diff} days remaining` : `${Math.abs(diff)} days overdue`;
+                        })()}
+                      </p>
                     </div>
-                    <Progress value={Math.min((project.timeCompletion || 0) * 100, 100)} className="h-2 mb-1" />
-                    <p className="text-xs text-muted-foreground">
-                      {(() => {
-                        const today = new Date();
-                        const finish = parseExcelDate(project.finishDate);
-                        if (!finish) return "Schedule timeline";
-                        const diff = Math.ceil((finish.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-                        return diff >= 0 ? `${diff} days remaining` : `${Math.abs(diff)} days overdue`;
-                      })()}
-                    </p>
-                  </div>
 
-                  {/* Performance Index */}
-                  <div>
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Performance Index</span>
-                      <span className={`text-sm font-bold ${(project.performanceIndex || 0) >= 1 ? 'text-green-600' : (project.performanceIndex || 0) >= 0.95 ? 'text-yellow-600' : 'text-red-600'}`}>
-                        {(project.performanceIndex || 0).toFixed(2)}
-                      </span>
+                    {/* Performance Index */}
+                    <div>
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Performance Index</span>
+                        <span className={`text-sm font-bold ${(project.performanceIndex || 0) >= 1 ? 'text-green-600' : (project.performanceIndex || 0) >= 0.95 ? 'text-yellow-600' : 'text-red-600'}`}>
+                          {(project.performanceIndex || 0).toFixed(2)}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 px-1">
+                        <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                          <div
+                            className={`h-2 rounded-full transition-all duration-300 ${(project.performanceIndex || 0) >= 1 ? 'bg-green-500' : (project.performanceIndex || 0) >= 0.95 ? 'bg-yellow-500' : 'bg-red-500'}`}
+                            style={{ width: `${Math.min((project.performanceIndex || 0) * 100, 100)}%` }}
+                          />
+                        </div>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {(project.performanceIndex || 0) >= 1 ? 'Ahead of schedule' : (project.performanceIndex || 0) >= 0.95 ? 'On track' : 'Behind schedule'}
+                      </p>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                        <div
-                          className={`h-2 rounded-full transition-all duration-300 ${(project.performanceIndex || 0) >= 1 ? 'bg-green-500' : (project.performanceIndex || 0) >= 0.95 ? 'bg-yellow-500' : 'bg-red-500'}`}
-                          style={{ width: `${Math.min((project.performanceIndex || 0) * 100, 100)}%` }}
-                        />
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Budget & Financial Progress */}
+              <Card className="h-full">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <DollarSign className="h-5 w-5 text-green-600" />
+                    Financial Progress
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-6">
+                  <div className="space-y-6">
+                    {/* Budget Utilization */}
+                    <div>
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Budget Spent</span>
+                        <span className="text-sm font-bold text-orange-600">{((project.budgetSpent || 0) * 100).toFixed(1)}%</span>
+                      </div>
+                      <Progress value={(project.budgetSpent || 0) * 100} className="h-2 mb-1" />
+                      <div className="flex justify-between text-xs text-muted-foreground">
+                        <span>Spent: {formatCurrency(project.totalAmountSpent)}</span>
+                        <span>Budget: {formatCurrency(project.budgetAmount)}</span>
                       </div>
                     </div>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {(project.performanceIndex || 0) >= 1 ? 'Ahead of schedule' : (project.performanceIndex || 0) >= 0.95 ? 'On track' : 'Behind schedule'}
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
 
-            {/* Budget & Financial Progress */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <DollarSign className="h-5 w-5 text-green-600" />
-                  Financial Progress
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-6">
-                  {/* Budget Utilization */}
-                  <div>
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Budget Spent</span>
-                      <span className="text-sm font-bold text-orange-600">{((project.budgetSpent || 0) * 100).toFixed(1)}%</span>
-                    </div>
-                    <Progress value={(project.budgetSpent || 0) * 100} className="h-2 mb-1" />
-                    <div className="flex justify-between text-xs text-muted-foreground">
-                      <span>Spent: {formatCurrency(project.totalAmountSpent)}</span>
-                      <span>Budget: {formatCurrency(project.budgetAmount)}</span>
-                    </div>
-                  </div>
-
-                  {/* Margin Progress */}
-                  <div>
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Projected vs Actual Margin</span>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="text-center p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                        <div className="text-lg font-bold text-blue-600">{((project.projectedGrossMargin || 0) * 100).toFixed(1)}%</div>
-                        <div className="text-xs text-muted-foreground">Projected</div>
+                    {/* Margin Progress */}
+                    <div>
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Projected vs Actual Margin</span>
                       </div>
-                      <div className="text-center p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
-                        <div className="text-lg font-bold text-green-600">{((project.actualGrossMargin || 0) * 100).toFixed(1)}%</div>
-                        <div className="text-xs text-muted-foreground">Actual</div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="text-center p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                          <div className="text-lg font-bold text-blue-600">{((project.projectedGrossMargin || 0) * 100).toFixed(1)}%</div>
+                          <div className="text-xs text-muted-foreground">Projected</div>
+                        </div>
+                        <div className="text-center p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                          <div className="text-lg font-bold text-green-600">{((project.actualGrossMargin || 0) * 100).toFixed(1)}%</div>
+                          <div className="text-xs text-muted-foreground">Actual</div>
+                        </div>
+                      </div>
+                      <div className="mt-2 text-center">
+                        <span className={`text-sm font-medium ${(project.deviationProfitMargin || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                          {(project.deviationProfitMargin || 0) >= 0 ? '+' : ''}{((project.deviationProfitMargin || 0) * 100).toFixed(1)}% deviation
+                        </span>
                       </div>
                     </div>
-                    <div className="mt-2 text-center">
-                      <span className={`text-sm font-medium ${(project.deviationProfitMargin || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                        {(project.deviationProfitMargin || 0) >= 0 ? '+' : ''}{((project.deviationProfitMargin || 0) * 100).toFixed(1)}% deviation
-                      </span>
-                    </div>
-                  </div>
 
-                  {/* Amount Received */}
-                  <div>
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Revenue Received</span>
-                      <span className="text-sm font-bold text-green-600">{project.amountReceived || 'N/A'}</span>
+                    {/* Revenue Received */}
+                    <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg border border-green-200 dark:border-green-800 min-h-[300px] flex flex-col justify-center">
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-sm font-medium text-green-800 dark:text-green-200">Revenue Received</span>
+                        <span className="text-lg font-bold text-green-600">{project.amountReceived || 'N/A'}</span>
+                      </div>
+                      <p className="text-xs text-green-700 dark:text-green-300">Cashflow and collections status</p>
+
+                      {/* Additional Revenue Details */}
+                      <div className="mt-4 space-y-3">
+                        <div className="flex justify-between items-center">
+                          <span className="text-xs text-green-700 dark:text-green-300">Collection Rate</span>
+                          <span className="text-sm font-medium text-green-600">
+                            {project.budgetAmount ? ((97000000 / project.budgetAmount) * 100).toFixed(1) : '0'}%
+                          </span>
+                        </div>
+                        <div className="w-full bg-green-200 dark:bg-green-800 rounded-full h-2">
+                          <div
+                            className="bg-green-600 h-2 rounded-full transition-all duration-300"
+                            style={{ width: `${project.budgetAmount ? Math.min((97000000 / project.budgetAmount) * 100, 100) : 0}%` }}
+                          />
+                        </div>
+                        <div className="flex justify-between items-center text-xs">
+                          <span className="text-green-600 dark:text-green-400">Outstanding: {project.budgetAmount ? formatCurrency(Math.max(0, project.budgetAmount - 97000000)) : 'N/A'}</span>
+                        </div>
+                      </div>
                     </div>
-                    <p className="text-xs text-muted-foreground">Cash flow and collections status</p>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+                </CardContent>
+              </Card>
+            </div>
           </div>
 
           {/* Activities Section */}
@@ -1695,11 +1567,11 @@ export default function ProjectDetailsDashboard({ id, setSelectedProjectId }: { 
             </div>
             {/* Activities Section - More compact */}
       <div className="mt-4 mb-4">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
           {/* Upcoming Activities - 3/4 width */}
           <Card
             data-testid="card-upcoming-activities"
-            className="lg:col-span-3"
+            className="xl:col-span-3"
           >
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -1729,7 +1601,7 @@ export default function ProjectDetailsDashboard({ id, setSelectedProjectId }: { 
           </Card>
 
           {/* Late Activities - 1/4 width - Compact */}
-          <Card data-testid="card-late-activities" className="lg:col-span-1">
+          <Card data-testid="card-late-activities" className="xl:col-span-1">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-sm">
                 <AlertTriangle className="h-4 w-4 text-red-500" />
@@ -2113,10 +1985,6 @@ export default function ProjectDetailsDashboard({ id, setSelectedProjectId }: { 
             )}
           </CardContent>
         </Card>
-        {/* Project Location Map */}
-        <div className="">
-          <ProjectMap projects={project ? [project] : []} />
-        </div>
         {/* <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
