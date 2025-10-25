@@ -1,6 +1,6 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useParams, Link } from "wouter";
-import React, { act, useState, useMemo } from "react";
+import React, { act, useState, useMemo, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -194,6 +194,11 @@ export default function ProjectDetailsDashboard({ id, setSelectedProjectId }: { 
   const [startDateForUpcoming, setStartDateForUpcoming] = useState<string>("");
   const [isAddingRisk, setIsAddingRisk] = useState(false);
   const [editingRisk, setEditingRisk] = useState<Risk | null>(null);
+
+  // Mobile gesture support
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const [riskForm, setRiskForm] = useState({
     title: "",
     description: "",
@@ -733,13 +738,72 @@ export default function ProjectDetailsDashboard({ id, setSelectedProjectId }: { 
       if (bPhase === -1) return -1;
       return aPhase - bPhase;
     });
+  // Mobile gesture handlers
+  const minSwipeDistance = 50;
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+
+    // Right swipe gesture to go back
+    if (isRightSwipe) {
+      setSelectedProjectId("null");
+    }
+  };
+
+  // Add swipe indicator animation
+  const [showSwipeHint, setShowSwipeHint] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setShowSwipeHint(false), 3000);
+    return () => clearTimeout(timer);
+  }, []);
+
   console.log(project, "adii project")
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div
+      ref={containerRef}
+      className="min-h-screen bg-gray-50 dark:bg-gray-900 relative"
+      onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEnd}
+    >
       {/* Scroll to top on mount */}
       {React.useEffect(() => {
         window.scrollTo({ top: 0, behavior: "smooth" });
       }, [])}
+
+      {/* Mobile swipe hint - appears briefly on mobile */}
+      {showSwipeHint && (
+        <div className="md:hidden fixed top-20 left-4 z-50 bg-blue-600 text-white px-4 py-2 rounded-lg shadow-lg animate-pulse">
+          <div className="flex items-center gap-2 text-sm">
+            <span>👈</span>
+            <span>Swipe right to go back</span>
+          </div>
+        </div>
+      )}
+
+      {/* Floating back button for mobile - always visible */}
+      <div className="md:hidden fixed bottom-6 right-4 z-50">
+        <Button
+          onClick={() => setSelectedProjectId("null")}
+          className="rounded-full w-14 h-14 shadow-lg bg-blue-600 hover:bg-blue-700 text-white border-2 border-white"
+        >
+          <ArrowLeft className="h-6 w-6" />
+        </Button>
+      </div>
+
       <div className="mb-2 ">
         <Navbar
           DisplayTitle={project.projectCode}
@@ -747,8 +811,8 @@ export default function ProjectDetailsDashboard({ id, setSelectedProjectId }: { 
           setSelectedProjectId={setSelectedProjectId}
         />
       </div>
-      {/* KPI Cards Row */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mx-5">
+      {/* KPI Cards Row - More compact */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-4 gap-2 sm:gap-4 mx-2 sm:mx-5">
         {/* <Card data-testid="kpi-scope-completion">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-0">
             <CardTitle className="text-sm font-medium">
@@ -785,73 +849,66 @@ export default function ProjectDetailsDashboard({ id, setSelectedProjectId }: { 
           </CardContent>
         </Card> */}
 
-        <Card data-testid="kpi-performance-category">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-0">
-            <CardTitle className="text-sm font-medium">Performance</CardTitle>
-            <Activity className="h-4 w-4 text-muted-foreground" />
+        <Card data-testid="kpi-performance-category" className="h-fit">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-xs sm:text-sm font-medium">Performance</CardTitle>
+            <Activity className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent>
-            <div className="text-lg font-medium">
+          <CardContent className="pb-3">
+            <div className="text-sm sm:text-lg font-medium">
               {getStatusBadge(project.performanceCategory || "Unknown")}
             </div>
-            <p className="text-xs text-muted-foreground mt-1">Current status</p>
+            <p className="text-xs text-muted-foreground mt-1 hidden sm:block">Current status</p>
           </CardContent>
         </Card>
 
-        <Card data-testid="kpi-budget-status">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-0">
-            <CardTitle className="text-sm font-medium">Budget Status</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
+        <Card data-testid="kpi-budget-status" className="h-fit">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-xs sm:text-sm font-medium">Budget Status</CardTitle>
+            <DollarSign className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent>
-            <div className="text-lg font-medium">
+          <CardContent className="pb-3">
+            <div className="text-sm sm:text-lg font-medium">
               {getBudgetStatusBadge(project.budgetStatusCategory || "Unknown")}
             </div>
-            <p className="text-xs text-muted-foreground mt-1">
+            <p className="text-xs text-muted-foreground mt-1 hidden sm:block">
               {formatCurrency(project.budgetAmount)}
             </p>
           </CardContent>
         </Card>
 
-        <Card data-testid="kpi-margin-deviation">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-0">
-            <CardTitle className="text-sm font-medium">
-              Margin Deviation
+        <Card data-testid="kpi-margin-deviation" className="h-fit">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-xs sm:text-sm font-medium">
+              Margin Dev.
             </CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-red-600">
+          <CardContent className="pb-3">
+            <div className="text-lg sm:text-2xl font-bold text-red-600">
               {((project.deviationProfitMargin || 0) * 100).toFixed(1)}%
             </div>
-            <p className="text-xs text-muted-foreground">From projected</p>
+            <p className="text-xs text-muted-foreground hidden sm:block">From projected</p>
           </CardContent>
         </Card>
 
-        <Card data-testid="kpi-total-risks">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-0">
-            <CardTitle className="text-sm font-medium">Active Risks</CardTitle>
-            <AlertTriangle className="h-4 w-4 text-muted-foreground" />
+        <Card data-testid="kpi-total-risks" className="h-fit">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-xs sm:text-sm font-medium">Active Risks</CardTitle>
+            <AlertTriangle className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-red-600">
+          <CardContent className="pb-3">
+            <div className="text-lg sm:text-2xl font-bold text-red-600">
               {4}
             </div>
-            <p className="text-xs text-muted-foreground">Issues & risks</p>
+            <p className="text-xs text-muted-foreground hidden sm:block">Issues & risks</p>
           </CardContent>
         </Card>
       </div>
-      {/* Project Analytics Section */}
-      <div className="mt-6">
+      {/* Project Analytics Section - More compact */}
+      <div className="mt-4">
         <div>
-          {/* <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <BarChart3 className="h-5 w-5" />
-                Project Analytics
-              </CardTitle>
-            </CardHeader> */}
-
-          <div className="flex flex-col lg:flex-row items-stretch justify-between mb-8 ">
+          <div className="flex flex-col lg:flex-row items-stretch justify-between mb-4 sm:mb-6">
             <div className="w-full lg:w-[25%] h-full ml-0 lg:ml-5">
               <Card data-testid="kpi-scope-completion ">
                 {/* <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-0">
@@ -930,7 +987,7 @@ export default function ProjectDetailsDashboard({ id, setSelectedProjectId }: { 
                   <Target className="h-4 w-4 text-muted-foreground" />
                 </CardHeader> */}
                 <CardContent>
-                  <div style={{ display: "flex", justifyContent: "center", alignItems: "center", width: "100%", minHeight: "370px", position: "relative", padding: "24px 0" }}>
+                  <div style={{ display: "flex", justifyContent: "center", alignItems: "center", width: "100%", minHeight: "280px", position: "relative", padding: "16px 0" }}>
                     <GaugeComponent
                       arc={{
                         subArcs: [
@@ -954,8 +1011,8 @@ export default function ProjectDetailsDashboard({ id, setSelectedProjectId }: { 
                         width: "100%",
                         height: "100%",
                         position: "relative",
-                        minHeight: "320px",
-                        maxHeight: "340px",
+                        minHeight: "240px",
+                        maxHeight: "280px",
                         margin: "0 auto",
                         display: "block",
                       }}
@@ -1243,9 +1300,9 @@ export default function ProjectDetailsDashboard({ id, setSelectedProjectId }: { 
       </div>
       {/* Milestones Section */}
 
-      {/* Activities Section - Full Width */}
-      <div className="mt-6 mb-6">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+      {/* Activities Section - More compact */}
+      <div className="mt-4 mb-4">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
           {/* Upcoming Activities - 3/4 width */}
           <Card
             data-testid="card-upcoming-activities"
