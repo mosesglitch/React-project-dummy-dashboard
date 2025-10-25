@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo, useMemo, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
@@ -9,9 +9,16 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { ArrowRight, Table as TableIcon } from 'lucide-react';
+import { ArrowRight, Table as TableIcon, Download, FileText, Database } from 'lucide-react';
+import { exportToCSV, exportToJSON } from '@/utils/exportUtils';
 
 interface Project {
   id: string | number;
@@ -71,7 +78,7 @@ const getBudgetStatusBadge = (status: string) => {
   return <Badge variant="outline">{status}</Badge>;
 };
 
-export const ProjectsTable: React.FC<ProjectsTableProps> = ({
+export const ProjectsTable: React.FC<ProjectsTableProps> = memo(({
   projects,
   projectsLoading,
   sortField,
@@ -80,7 +87,7 @@ export const ProjectsTable: React.FC<ProjectsTableProps> = ({
   onProjectSelect,
   theme,
 }) => {
-  const sortedProjects = [...(projects || [])].sort((a, b) => {
+  const sortedProjects = useMemo(() => [...(projects || [])].sort((a, b) => {
     let aVal: any, bVal: any;
 
     switch (sortField) {
@@ -116,7 +123,15 @@ export const ProjectsTable: React.FC<ProjectsTableProps> = ({
     }
 
     return 0;
-  });
+  }), [projects, sortField, sortAsc]);
+
+  const handleExport = (format: 'csv' | 'json') => {
+    if (format === 'csv') {
+      exportToCSV(sortedProjects, 'projects_export');
+    } else {
+      exportToJSON(sortedProjects, 'projects_export');
+    }
+  };
 
   return (
     <Card data-testid="card-projects-table">
@@ -133,9 +148,24 @@ export const ProjectsTable: React.FC<ProjectsTableProps> = ({
             Project Portfolio
           </div>
         </CardTitle>
-        <Button variant="outline" data-testid="button-export-projects">
-          Export Data
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" data-testid="button-export-projects">
+              <Download className="h-4 w-4 mr-2" />
+              Export Data
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => handleExport('csv')}>
+              <FileText className="h-4 w-4 mr-2" />
+              Export as CSV
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleExport('json')}>
+              <Database className="h-4 w-4 mr-2" />
+              Export as JSON
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </CardHeader>
       <CardContent>
         <div className="overflow-x-auto">
@@ -291,4 +321,4 @@ export const ProjectsTable: React.FC<ProjectsTableProps> = ({
       </CardContent>
     </Card>
   );
-};
+});

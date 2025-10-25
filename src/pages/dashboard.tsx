@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import { Filter, X } from "lucide-react";
 import { Navbar } from "@/components/navbar";
@@ -11,6 +11,12 @@ import { useDashboardData } from "@/hooks/useDashboardData";
 import { KpiCards } from "@/components/dashboard/KpiCards";
 import { ChartsSection } from "@/components/dashboard/ChartsSection";
 import { ProjectsTable } from "@/components/dashboard/ProjectsTable";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
+import {
+  KpiCardsSkeleton,
+  ChartsSkeletonRow,
+  ProjectsTableSkeleton
+} from "@/components/LoadingSkeleton";
 type Project = {
   code: string;
   budget: number;
@@ -129,7 +135,11 @@ export default function Dashboard() {
         {/* Main Dashboard Grid */}
         <div className="space-y-6">
           {/* KPI Cards */}
-          <KpiCards kpiData={kpiData} />
+          <ErrorBoundary>
+            <Suspense fallback={<KpiCardsSkeleton />}>
+              <KpiCards kpiData={kpiData} />
+            </Suspense>
+          </ErrorBoundary>
 
           {/* Budget Overview Section */}
           {/* <div className="lg:col-span-4 mb-6">
@@ -216,30 +226,40 @@ export default function Dashboard() {
           </div> */}
 
           {/* Charts and Data Visualization */}
-          <ChartsSection
-            projects={projects}
-            divisionStats={divisionStats}
-            topProjects={topProjects}
-            filters={filters}
-            setFilters={setFilters}
-            theme={theme}
-          />
+          <ErrorBoundary>
+            <Suspense fallback={<ChartsSkeletonRow />}>
+              <ChartsSection
+                projects={projects}
+                divisionStats={divisionStats}
+                topProjects={topProjects}
+                filters={filters}
+                setFilters={setFilters}
+                theme={theme}
+              />
+            </Suspense>
+          </ErrorBoundary>
 
           {/* Projects Table */}
-          <ProjectsTable
-            projects={projects || []}
-            projectsLoading={projectsLoading}
-            sortField={sortField}
-            sortAsc={sortAsc}
-            onSort={handleSort}
-            onProjectSelect={handleProjectSelect}
-            theme={theme}
-          />
+          <ErrorBoundary>
+            <Suspense fallback={<ProjectsTableSkeleton />}>
+              <ProjectsTable
+                projects={projects || []}
+                projectsLoading={projectsLoading}
+                sortField={sortField}
+                sortAsc={sortAsc}
+                onSort={handleSort}
+                onProjectSelect={handleProjectSelect}
+                theme={theme}
+              />
+            </Suspense>
+          </ErrorBoundary>
 
           {/* Project Locations Map */}
-          <div className="mt-6">
-            <ProjectMap projects={projects || []} />
-          </div>
+          <ErrorBoundary>
+            <div className="mt-6">
+              <ProjectMap projects={projects || []} />
+            </div>
+          </ErrorBoundary>
         </div>
 
         {/* Filter Modal */}

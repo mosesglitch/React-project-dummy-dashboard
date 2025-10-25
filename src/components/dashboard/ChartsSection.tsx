@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { BarChart3, PieChart } from 'lucide-react';
 import {
@@ -53,7 +53,7 @@ const formatCurrency = (amount: number | undefined | null) => {
   return `Ksh ${validAmount.toLocaleString()}`;
 };
 
-export const ChartsSection: React.FC<ChartsSectionProps> = ({
+export const ChartsSection: React.FC<ChartsSectionProps> = memo(({
   projects,
   divisionStats,
   topProjects,
@@ -61,6 +61,57 @@ export const ChartsSection: React.FC<ChartsSectionProps> = ({
   setFilters,
   theme,
 }) => {
+  // Memoize expensive chart data calculations
+  const divisionCoData = useMemo(() => {
+    if (!projects || projects.length === 0) return [];
+    return Object.values(
+      projects.reduce<Record<string, { division: string; value: number }>>(
+        (acc, project) => {
+          const div = project.division || 'Unknown';
+          if (!acc[div]) {
+            acc[div] = { division: div, value: 0 };
+          }
+          acc[div].value += Math.round(project.coAmount || 0);
+          return acc;
+        },
+        {}
+      )
+    );
+  }, [projects]);
+
+  const performanceData = useMemo(() => {
+    if (!projects || projects.length === 0) return [];
+    return Object.values(
+      projects.reduce<Record<string, { category: string; value: number }>>(
+        (acc, project) => {
+          const cat = project.performanceCategory || 'Unknown';
+          if (!acc[cat]) {
+            acc[cat] = { category: cat, value: 0 };
+          }
+          acc[cat].value += 1;
+          return acc;
+        },
+        {}
+      )
+    );
+  }, [projects]);
+
+  const budgetStatusData = useMemo(() => {
+    if (!projects || projects.length === 0) return [];
+    return Object.values(
+      projects.reduce<Record<string, { status: string; value: number }>>(
+        (acc, project) => {
+          const status = project.budgetStatusCategory || 'Unknown';
+          if (!acc[status]) {
+            acc[status] = { status, value: 0 };
+          }
+          acc[status].value += 1;
+          return acc;
+        },
+        {}
+      )
+    );
+  }, [projects]);
   return (
     <div className="space-y-6">
       {/* Charts Row */}
@@ -109,20 +160,9 @@ export const ChartsSection: React.FC<ChartsSectionProps> = ({
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {projects && projects.length > 0 ? (
+            {divisionCoData.length > 0 ? (
               <DonutChart
-                dataset={Object.values(
-                  projects.reduce<
-                    Record<string, { division: string; value: number }>
-                  >((acc, project) => {
-                    const div = project.division || 'Unknown';
-                    if (!acc[div]) {
-                      acc[div] = { division: div, value: 0 };
-                    }
-                    acc[div].value += Math.round(project.coAmount || 0);
-                    return acc;
-                  }, {})
-                )}
+                dataset={divisionCoData}
                 dimension={{ accessor: 'division' }}
                 measure={{
                   accessor: 'value',
@@ -156,20 +196,9 @@ export const ChartsSection: React.FC<ChartsSectionProps> = ({
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {projects && projects.length > 0 ? (
+            {performanceData.length > 0 ? (
               <DonutChart
-                dataset={Object.values(
-                  projects.reduce<
-                    Record<string, { category: string; value: number }>
-                  >((acc, project) => {
-                    const cat = project.performanceCategory || 'Unknown';
-                    if (!acc[cat]) {
-                      acc[cat] = { category: cat, value: 0 };
-                    }
-                    acc[cat].value += 1;
-                    return acc;
-                  }, {})
-                )}
+                dataset={performanceData}
                 dimension={{ accessor: 'category' }}
                 measure={{ accessor: 'value' }}
                 onDataPointClick={(e) => {
@@ -200,20 +229,9 @@ export const ChartsSection: React.FC<ChartsSectionProps> = ({
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {projects && projects.length > 0 ? (
+            {budgetStatusData.length > 0 ? (
               <DonutChart
-                dataset={Object.values(
-                  projects.reduce<
-                    Record<string, { status: string; value: number }>
-                  >((acc, project) => {
-                    const status = project.budgetStatusCategory || 'Unknown';
-                    if (!acc[status]) {
-                      acc[status] = { status, value: 0 };
-                    }
-                    acc[status].value += 1;
-                    return acc;
-                  }, {})
-                )}
+                dataset={budgetStatusData}
                 dimension={{ accessor: 'status' }}
                 measure={{ accessor: 'value' }}
                 onDataPointClick={(e) => {
@@ -369,4 +387,4 @@ export const ChartsSection: React.FC<ChartsSectionProps> = ({
       )}
     </div>
   );
-};
+});

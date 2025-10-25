@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   BarChart3,
@@ -29,7 +29,7 @@ const formatCurrency = (amount: number | undefined | null) => {
   return `Ksh ${validAmount.toLocaleString()}`;
 };
 
-export const KpiCards: React.FC<KpiCardsProps> = ({ kpiData }) => {
+export const KpiCards: React.FC<KpiCardsProps> = memo(({ kpiData }) => {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
       <Card data-testid="tile-total-projects">
@@ -104,4 +104,4 @@ export const KpiCards: React.FC<KpiCardsProps> = ({ kpiData }) => {
       </Card>
     </div>
   );
-};
+});
