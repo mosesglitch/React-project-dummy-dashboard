@@ -19,6 +19,7 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { ArrowRight, Table as TableIcon, Download, FileText, Database } from 'lucide-react';
 import { exportToCSV, exportToJSON } from '@/utils/exportUtils';
+import { NotificationToast, useNotification } from '@/components/NotificationToast';
 
 interface Project {
   id: string | number;
@@ -125,43 +126,56 @@ export const ProjectsTable: React.FC<ProjectsTableProps> = memo(({
     return 0;
   }), [projects, sortField, sortAsc]);
 
+  const { notification, showNotification, hideNotification } = useNotification();
+
   const handleExport = (format: 'csv' | 'json') => {
-    if (format === 'csv') {
-      exportToCSV(sortedProjects, 'projects_export');
-    } else {
-      exportToJSON(sortedProjects, 'projects_export');
+    try {
+      if (format === 'csv') {
+        exportToCSV(sortedProjects, 'projects_export');
+        showNotification(`Successfully exported ${sortedProjects.length} projects to CSV`, 'success');
+      } else {
+        exportToJSON(sortedProjects, 'projects_export');
+        showNotification(`Successfully exported ${sortedProjects.length} projects to JSON`, 'success');
+      }
+    } catch (error) {
+      showNotification('Failed to export data. Please try again.', 'error');
     }
   };
 
   return (
-    <Card data-testid="card-projects-table">
-      <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle className="flex items-center gap-2">
-          <div>
-            <TableIcon className="h-5 w-5" />
+    <Card data-testid="card-projects-table" className="hover:shadow-lg transition-all duration-300">
+      <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6">
+        <CardTitle className="flex items-center gap-3 text-gray-700 dark:text-gray-200">
+          <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+            <TableIcon className="h-5 w-5 text-blue-600 dark:text-blue-400" />
           </div>
-          <div
-            className={` ${
-              theme === 'dark' ? 'text-gray-300' : 'text-black'
-            }`}
-          >
-            Project Portfolio
-          </div>
+          <span className="text-lg font-semibold">Project Portfolio</span>
         </CardTitle>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" data-testid="button-export-projects">
+            <Button
+              variant="outline"
+              data-testid="button-export-projects"
+              className="hover:bg-blue-50 hover:border-blue-300 dark:hover:bg-blue-900/20 transition-colors duration-200"
+            >
               <Download className="h-4 w-4 mr-2" />
-              Export Data
+              <span className="hidden sm:inline">Export Data</span>
+              <span className="sm:hidden">Export</span>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => handleExport('csv')}>
-              <FileText className="h-4 w-4 mr-2" />
+          <DropdownMenuContent align="end" className="w-48">
+            <DropdownMenuItem
+              onClick={() => handleExport('csv')}
+              className="hover:bg-green-50 dark:hover:bg-green-900/20 cursor-pointer"
+            >
+              <FileText className="h-4 w-4 mr-2 text-green-600" />
               Export as CSV
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleExport('json')}>
-              <Database className="h-4 w-4 mr-2" />
+            <DropdownMenuItem
+              onClick={() => handleExport('json')}
+              className="hover:bg-purple-50 dark:hover:bg-purple-900/20 cursor-pointer"
+            >
+              <Database className="h-4 w-4 mr-2 text-purple-600" />
               Export as JSON
             </DropdownMenuItem>
           </DropdownMenuContent>
@@ -319,6 +333,13 @@ export const ProjectsTable: React.FC<ProjectsTableProps> = memo(({
           </div>
         </div>
       </CardContent>
+
+      <NotificationToast
+        message={notification.message}
+        type={notification.type}
+        isVisible={notification.isVisible}
+        onClose={hideNotification}
+      />
     </Card>
   );
 });

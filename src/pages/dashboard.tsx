@@ -79,61 +79,69 @@ export default function Dashboard() {
     );
   }
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
       <Navbar />
-      <div className="px-4 md:px-6 pt-3">
+      <div className="px-4 md:px-6 lg:px-8 pt-6 pb-8">
         {/* Header */}
 
-        {/* Filter Button */}
-        <div className="mb-3 flex justify-between items-center">
-          <div className="flex items-center gap-4">
-            {/* Filter indicator */}
-            {(filters.division !== "all" ||
-              filters.status !== "all" ||
-              filters.budgetStatus !== "all" ||
-              filters.performanceStatus !== "all" ||
-              filters.dateFrom ||
-              filters.dateTo) && (
-                <div className="flex items-center gap-4">
-                  <div className="text-sm text-muted-foreground">
-                    Filters applied
-                  </div>
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    onClick={() =>
-                      setFilters({
-                        status: "all",
-                        division: "all",
-                        budgetStatus: "all",
-                        performanceStatus: "all",
-                        dateFrom: "",
-                        dateTo: "",
-                      })
-                    }
-                    data-testid="button-open-filters"
-                    className="flex items-center gap-2"
-                  >
-                    <X className="h-4 w-4" />
-                    Clear Filters
-                  </Button>
-                </div>
-              )}
+        {/* Dashboard Header */}
+        <div className="mb-8">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+            <div>
+              <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+                Project Dashboard
+              </h1>
+              <p className="text-gray-600 dark:text-gray-400">
+                Monitor and manage your project portfolio
+              </p>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsFilterModalOpen(true)}
+              data-testid="button-open-filters"
+              className="flex items-center gap-2 hover:bg-blue-50 hover:border-blue-300 dark:hover:bg-blue-900/20 transition-colors duration-200"
+            >
+              <Filter className="h-4 w-4" />
+              <span className="hidden sm:inline">Filters</span>
+            </Button>
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setIsFilterModalOpen(true)}
-            data-testid="button-open-filters"
-            className="flex items-center gap-2"
-          >
-            <Filter className="h-4 w-4" />
-            Filters
-          </Button>
+
+          {/* Filter indicator */}
+          {(filters.division !== "all" ||
+            filters.status !== "all" ||
+            filters.budgetStatus !== "all" ||
+            filters.performanceStatus !== "all" ||
+            filters.dateFrom ||
+            filters.dateTo) && (
+              <div className="flex flex-wrap items-center gap-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                <div className="text-sm font-medium text-blue-800 dark:text-blue-200">
+                  Filters applied:
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() =>
+                    setFilters({
+                      status: "all",
+                      division: "all",
+                      budgetStatus: "all",
+                      performanceStatus: "all",
+                      dateFrom: "",
+                      dateTo: "",
+                    })
+                  }
+                  className="h-6 px-2 text-xs bg-red-100 hover:bg-red-200 text-red-700 dark:bg-red-900/30 dark:hover:bg-red-900/50 dark:text-red-300"
+                >
+                  <X className="h-3 w-3 mr-1" />
+                  Clear All
+                </Button>
+              </div>
+            )}
         </div>
 
         {/* Main Dashboard Grid */}
-        <div className="space-y-6">
+        <div className="space-y-8">
           {/* KPI Cards */}
           <ErrorBoundary>
             <Suspense fallback={<KpiCardsSkeleton />}>

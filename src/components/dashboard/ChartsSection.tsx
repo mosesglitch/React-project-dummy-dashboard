@@ -115,13 +115,15 @@ export const ChartsSection: React.FC<ChartsSectionProps> = memo(({
   return (
     <div className="space-y-6">
       {/* Charts Row */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 md:gap-6">
         {/* Division Projects Chart */}
-        <Card data-testid="card-division-chart">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <BarChart3 className="h-5 w-5" />
-              Projects by Division
+        <Card data-testid="card-division-chart" className="hover:shadow-lg transition-all duration-300">
+          <CardHeader className="pb-4">
+            <CardTitle className="flex items-center gap-3 text-gray-700 dark:text-gray-200">
+              <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                <BarChart3 className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              </div>
+              <span className="text-sm font-semibold">Projects by Division</span>
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -152,11 +154,13 @@ export const ChartsSection: React.FC<ChartsSectionProps> = memo(({
         </Card>
 
         {/* CO Amount by Division Chart */}
-        <Card data-testid="card-division-coamount-chart">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <PieChart className="h-5 w-5" />
-              CO Amount by Division
+        <Card data-testid="card-division-coamount-chart" className="hover:shadow-lg transition-all duration-300">
+          <CardHeader className="pb-4">
+            <CardTitle className="flex items-center gap-3 text-gray-700 dark:text-gray-200">
+              <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
+                <PieChart className="h-5 w-5 text-green-600 dark:text-green-400" />
+              </div>
+              <span className="text-sm font-semibold">CO Amount by Division</span>
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -188,11 +192,13 @@ export const ChartsSection: React.FC<ChartsSectionProps> = memo(({
         </Card>
 
         {/* Performance Status Chart */}
-        <Card data-testid="card-status-chart">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <PieChart className="h-5 w-5" />
-              Performance Status
+        <Card data-testid="card-status-chart" className="hover:shadow-lg transition-all duration-300">
+          <CardHeader className="pb-4">
+            <CardTitle className="flex items-center gap-3 text-gray-700 dark:text-gray-200">
+              <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+                <PieChart className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+              </div>
+              <span className="text-sm font-semibold">Performance Status</span>
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -221,11 +227,13 @@ export const ChartsSection: React.FC<ChartsSectionProps> = memo(({
         </Card>
 
         {/* Budget Status Chart */}
-        <Card data-testid="card-budget-status-chart">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <PieChart className="h-5 w-5" />
-              Budget Status
+        <Card data-testid="card-budget-status-chart" className="hover:shadow-lg transition-all duration-300">
+          <CardHeader className="pb-4">
+            <CardTitle className="flex items-center gap-3 text-gray-700 dark:text-gray-200">
+              <div className="p-2 bg-orange-100 dark:bg-orange-900/30 rounded-lg">
+                <PieChart className="h-5 w-5 text-orange-600 dark:text-orange-400" />
+              </div>
+              <span className="text-sm font-semibold">Budget Status</span>
             </CardTitle>
           </CardHeader>
           <CardContent>
