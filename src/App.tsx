@@ -1,22 +1,26 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-// import './App.css'
+import { Router, Route, Switch } from 'wouter'
 import Dashboard from './pages/dashboard'
+import AnalyticsDashboard from './pages/analytics-dashboard'
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/theme-provider";
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
     <>
-   
       <ThemeProvider defaultTheme="light" storageKey="dashboard-theme">
         <TooltipProvider>
           <Toaster />
-          <Dashboard />
+          <Router>
+            <Switch>
+              <Route path="/" component={Dashboard} />
+              <Route path="/analytics" component={AnalyticsDashboard} />
+              <Route>
+                <Dashboard />
+              </Route>
+            </Switch>
+          </Router>
         </TooltipProvider>
       </ThemeProvider>
     </>

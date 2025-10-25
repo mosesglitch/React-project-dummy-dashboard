@@ -1,6 +1,7 @@
 import React, { useState, Suspense } from "react";
 import { Button } from "@/components/ui/button";
-import { Filter, X } from "lucide-react";
+import { Filter, X, BarChart3 } from "lucide-react";
+import { Link } from "wouter";
 import { Navbar } from "@/components/navbar";
 import { ProjectMap } from "@/components/dashboard/project-map";
 import { FilterModal } from "@/components/filter-modal";
@@ -95,16 +96,28 @@ export default function Dashboard() {
                 Monitor and manage your project portfolio
               </p>
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setIsFilterModalOpen(true)}
-              data-testid="button-open-filters"
-              className="flex items-center gap-2 hover:bg-blue-50 hover:border-blue-300 dark:hover:bg-blue-900/20 transition-colors duration-200"
-            >
-              <Filter className="h-4 w-4" />
-              <span className="hidden sm:inline">Filters</span>
-            </Button>
+            <div className="flex items-center gap-2">
+              <Link href="/analytics">
+                <Button
+                  variant="default"
+                  size="sm"
+                  className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white"
+                >
+                  <BarChart3 className="h-4 w-4" />
+                  <span className="hidden sm:inline">Analytics</span>
+                </Button>
+              </Link>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setIsFilterModalOpen(true)}
+                data-testid="button-open-filters"
+                className="flex items-center gap-2 hover:bg-blue-50 hover:border-blue-300 dark:hover:bg-blue-900/20 transition-colors duration-200"
+              >
+                <Filter className="h-4 w-4" />
+                <span className="hidden sm:inline">Filters</span>
+              </Button>
+            </div>
           </div>
 
           {/* Filter indicator */}
